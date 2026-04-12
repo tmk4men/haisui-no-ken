@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PoseLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 type Frame = { landmarks: NormalizedLandmark[]; timestamp: number };
@@ -45,7 +45,7 @@ export function usePoseDetection(videoRef: React.RefObject<HTMLVideoElement | nu
     };
   }, []);
 
-  const start = () => {
+  const start = useCallback(() => {
     runningRef.current = true;
     const loop = () => {
       if (!runningRef.current) return;
@@ -61,12 +61,12 @@ export function usePoseDetection(videoRef: React.RefObject<HTMLVideoElement | nu
       rafRef.current = requestAnimationFrame(loop);
     };
     loop();
-  };
+  }, [videoRef]);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     runningRef.current = false;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-  };
+  }, []);
 
   return { ready, error, start, stop };
 }
