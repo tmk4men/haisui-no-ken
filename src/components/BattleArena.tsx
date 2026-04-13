@@ -33,8 +33,17 @@ export function BattleArena({
     const next = resolveTurn(state, action, derived, enemy);
     const log = next.log[next.log.length - 1];
     const techName = log.playerTechName || log.enemyTechName;
-    if (techName) { SFX.special(); setFlash({ name: techName, key: Date.now() }); }
-    else if (log.playerDamage > 0 || log.enemyDamage > 0) SFX.rep();
+    if (techName) {
+      SFX.special();
+      setFlash({ name: techName, key: Date.now() });
+    } else {
+      // アクション別音
+      if (log.playerAction === "kick" || log.enemyAction === "kick") SFX.deep();
+      else if (log.playerAction === "guard" && log.enemyAction === "guard") SFX.guard();
+      else if (log.playerAction === "guard" || log.enemyAction === "guard") SFX.guard();
+      else if (log.playerDamage > 0 || log.enemyDamage > 0) SFX.rep();
+    }
+    if (log.enemyDamage > 0 && !techName) setTimeout(() => SFX.hit(), 80);
     setState(next);
     if (next.over) setTimeout(onFinished, 900);
     setTechOpen(false);

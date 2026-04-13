@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { SFX } from "@/lib/audio/sfx";
 
 export function BikeLoader() {
   const [phase, setPhase] = useState<"run" | "done">("run");
   useEffect(() => {
+    SFX.bike();
     const t = setTimeout(() => setPhase("done"), 1400);
     return () => clearTimeout(t);
   }, []);
