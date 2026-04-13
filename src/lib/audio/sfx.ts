@@ -134,11 +134,16 @@ export function playClick() {
   const i = 1 + Math.floor(Math.random() * 3);
   play(`/sfx/count/click${i}.mp3`, () => beep(1000, 60, "square", 0.05), 0.7);
 }
+export function playTap() {
+  const i = 1 + Math.floor(Math.random() * 3);
+  play(`/sfx/tap/tap${i}.mp3`, () => beep(1400, 40, "square", 0.04), 0.55);
+}
 
 export const SFX = {
   strike: playStrike,
   coin: (v: 1 | 2 | 3 = 1) => playCoin(v),
   click: playClick,
+  tap:   playTap,
   rep:    () => play("/sfx/punch.mp3",   () => beep(880, 80, "sine", 0.05), 0.8),
   deep:   () => play("/sfx/kick.mp3",    () => beep(1200, 150, "triangle", 0.06), 0.9),
   guard:  () => play("/sfx/guard.mp3",   () => beep(400, 120, "square", 0.06), 0.7),
