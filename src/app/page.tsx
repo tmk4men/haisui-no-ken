@@ -56,9 +56,11 @@ export default function HomePage() {
           </div>
         </div>
         <StatsPanel base={c.base} derived={derived} />
-      </section>
 
-      <MissionsPanel missions={todayStats.missions} />
+        <div className="relative mt-4">
+          <MissionsPanel missions={todayStats.missions} />
+        </div>
+      </section>
 
       <section className="panel-washi rounded-xl p-4">
         <h3 className="text-xs font-kan text-rose-300/80 mb-3 tracking-[0.2em]">⟢ 今日刻んだ分</h3>
