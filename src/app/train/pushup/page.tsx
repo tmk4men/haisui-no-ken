@@ -31,7 +31,8 @@ export default function PushupPage() {
       setCounts(c => ({ ...c, [q]: c[q] + 1 }));
       setDisplay(d => ({ ...d, lastQuality: q }));
       setFlash(Date.now());
-      q === "deep" ? SFX.deep() : SFX.rep();
+      SFX.click();
+      if (q === "deep") setTimeout(() => SFX.click(), 90);
     }
     setDisplay(d => ({ ...d, angle: res.displayMetric, phase: res.phase }));
   });
