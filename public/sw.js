@@ -1,4 +1,4 @@
-const CACHE = "kandou-v7";
+const CACHE = "kandou-v8";
 const ASSETS = ["/"];
 
 self.addEventListener("install", (e) => {

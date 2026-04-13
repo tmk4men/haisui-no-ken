@@ -50,10 +50,33 @@ export function BgmPlayer() {
     const onVol = () => {
       if (audioRef.current) audioRef.current.volume = getBgmVolume();
     };
+    const onVisibility = () => {
+      const cur = audioRef.current;
+      if (!cur) return;
+      if (document.visibilityState === "hidden") {
+        try { cur.pause(); } catch { /* ignore */ }
+      } else {
+        // 戻ってきた時：バトル中でなければ再開
+        if (!window.location.pathname.startsWith("/battle")) {
+          cur.volume = getBgmVolume();
+          const p = cur.play();
+          if (p && typeof p.catch === "function") p.catch(() => { /* ignore */ });
+        }
+      }
+    };
+    const onPageHide = () => {
+      try { audioRef.current?.pause(); } catch { /* ignore */ }
+    };
     window.addEventListener("bgm-volume-changed", onVol);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("blur", onPageHide);
 
     return () => {
       window.removeEventListener("bgm-volume-changed", onVol);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("blur", onPageHide);
       try { a.pause(); a.src = ""; } catch { /* ignore */ }
       audioRef.current = null;
     };
