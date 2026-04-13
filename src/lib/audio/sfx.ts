@@ -72,6 +72,44 @@ function play(file: string, fallback: () => void, gain = 1) {
   }
 }
 
+// --- 単車ローダー用：最初の4秒だけ再生してフェードアウト ---
+export function playBikeLoader(opts: { durationMs?: number; fadeMs?: number } = {}) {
+  if (typeof window === "undefined") return;
+  const vol = getVolume();
+  if (vol <= 0) return;
+  const duration = opts.durationMs ?? 4000;
+  const fade = opts.fadeMs ?? 1200;
+  const audio = new Audio("/sfx/bike.mp3");
+  audio.preload = "auto";
+  audio.volume = Math.max(0, Math.min(1, vol * 0.8));
+  audio.play().catch(() => {
+    // フォールバック（シンセの爆音模倣）
+    const a = ac(); if (!a) return;
+    const osc = a.createOscillator(); const g = a.createGain();
+    osc.type = "sawtooth"; osc.frequency.value = 70;
+    g.gain.value = 0.06 * vol;
+    osc.connect(g).connect(a.destination);
+    osc.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration / 1000);
+    osc.stop(a.currentTime + duration / 1000);
+  });
+  // フェードアウト
+  const start = duration - fade;
+  const startVol = audio.volume;
+  const tFade = setTimeout(() => {
+    const steps = 20;
+    let i = 0;
+    const iv = setInterval(() => {
+      i++;
+      const ratio = 1 - i / steps;
+      audio.volume = Math.max(0, startVol * ratio);
+      if (i >= steps) clearInterval(iv);
+    }, fade / 20);
+  }, start);
+  const tStop = setTimeout(() => { try { audio.pause(); audio.src = ""; } catch {} }, duration);
+  return () => { clearTimeout(tFade); clearTimeout(tStop); try { audio.pause(); } catch {} };
+}
+
 export const SFX = {
   rep:    () => play("/sfx/punch.mp3",   () => beep(880, 80, "sine", 0.05), 0.8),
   deep:   () => play("/sfx/kick.mp3",    () => beep(1200, 150, "triangle", 0.06), 0.9),
@@ -80,5 +118,5 @@ export const SFX = {
   special:() => play("/sfx/tech.mp3",    () => { beep(180, 120, "sawtooth", 0.1); setTimeout(() => beep(520, 240, "square", 0.08), 120); }, 1),
   victory:() => play("/sfx/victory.mp3", () => { beep(523, 120, "square", 0.08); setTimeout(() => beep(659, 120, "square", 0.08), 140); setTimeout(() => beep(784, 260, "square", 0.08), 280); }, 1),
   defeat: () => play("/sfx/defeat.mp3",  () => beep(120, 500, "sawtooth", 0.07), 0.9),
-  bike:   () => play("/sfx/bike.mp3",    () => { beep(80, 300, "sawtooth", 0.08); setTimeout(() => beep(60, 600, "sawtooth", 0.06), 200); }, 0.8),
+  bike:   () => playBikeLoader(),
 };

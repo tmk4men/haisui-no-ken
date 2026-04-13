@@ -6,7 +6,7 @@ export function BikeLoader() {
   const [phase, setPhase] = useState<"run" | "done">("run");
   useEffect(() => {
     SFX.bike();
-    const t = setTimeout(() => setPhase("done"), 1400);
+    const t = setTimeout(() => setPhase("done"), 3800);
     return () => clearTimeout(t);
   }, []);
   if (phase === "done") return null;
@@ -40,19 +40,19 @@ export function BikeLoader() {
         ))}
       </div>
       <style jsx>{`
-        .bike-root { animation: rootFade 1.4s ease-out forwards; }
-        .bike-fade { animation: bgFade 1.4s ease-in forwards; }
+        .bike-root { animation: rootFade 3.8s ease-out forwards; }
+        .bike-fade { animation: bgFade 3.8s ease-in forwards; }
         @keyframes rootFade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
         @keyframes bgFade  { 0% { opacity: 1; } 60% { opacity: 0.6; } 100% { opacity: 0; } }
 
-        .bike-move { animation: bikeRide 1.2s cubic-bezier(0.25, 0.1, 0.35, 1) forwards; }
+        .bike-move { animation: bikeRide 3s cubic-bezier(0.25, 0.1, 0.35, 1) forwards; }
         @keyframes bikeRide {
           0%   { transform: translate(-40vw, -50%) rotate(-1deg); }
           50%  { transform: translate(50vw, -50%) rotate(-1deg); }
           100% { transform: translate(140vw, -50%) rotate(0deg); }
         }
 
-        .smoke-move { animation: bikeRide 1.2s cubic-bezier(0.25, 0.1, 0.35, 1) forwards; }
+        .smoke-move { animation: bikeRide 3s cubic-bezier(0.25, 0.1, 0.35, 1) forwards; }
         .smoke-puff {
           width: 10px; height: 10px;
           animation: puff 0.9s ease-out infinite;
