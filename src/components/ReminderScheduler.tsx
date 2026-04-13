@@ -17,7 +17,7 @@ export function ReminderScheduler() {
       const last = localStorage.getItem(KEY);
       if (last === todayKey()) return;
       if (Notification.permission === "granted") {
-        new Notification("背水ノ拳", { body: "今日も、刻め。" });
+        new Notification("漢道", { body: "今日も、刻め。" });
       }
       localStorage.setItem(KEY, todayKey());
     }, 30000);

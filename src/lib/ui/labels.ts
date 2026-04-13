@@ -1,5 +1,7 @@
-export const TITLE = "背水ノ拳";
-export const TAGLINE = "刻んだ努力だけが、拳になる。";
+export const TITLE = "漢道";
+export const TITLE_SUB = "OTOKODOU";
+export const TITLE_MARK = "刻";
+export const TAGLINE = "日々、己を刻め。";
 
 export const BASE_LABEL = { body: "拳", mind: "頭", discipline: "肚" } as const;
 

@@ -7,6 +7,7 @@ import { useGameState } from "@/hooks/useGameState";
 import { SquatDetector, SQUAT_FORM_MSG, SquatFormIssue } from "@/lib/pose/squatDetector";
 import { SquatQuality } from "@/types/game";
 import { SFX } from "@/lib/audio/sfx";
+import { TrainBanner } from "@/components/TrainBanner";
 
 const QUALITY_LABEL: Record<SquatQuality, string> = { good: "Good", deep: "Deep!", fast: "Fast", shallow: "Shallow" };
 const QUALITY_COLOR: Record<SquatQuality, string> = { good: "text-emerald-300", deep: "text-amber-300", fast: "text-sky-300", shallow: "text-slate-500" };
@@ -60,11 +61,11 @@ export default function SquatPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">スクワット</h2>
+      <TrainBanner src="/bg/squat.png" title="シバキ上げ・スクワット" desc="深く沈め、脚に刻め" />
+      <div className="flex justify-end">
         <Link href="/train/squat/manual" className="text-xs text-slate-400 underline">カメラなしモード</Link>
       </div>
-      <p className="text-sm text-slate-400">90°以下=有効、75°以下=Deep(+50%)、速すぎ=Fast(-40%)、浅い=Shallow(-70%)</p>
+      <p className="text-xs text-slate-400 font-kan">90°以下=有効、75°以下=Deep(+50%)、速すぎ=Fast(-40%)、浅い=Shallow(-70%)</p>
 
       <div className="relative rounded-xl overflow-hidden bg-black aspect-video ring-1 ring-slate-800">
         <video ref={videoRef} className="w-full h-full object-contain" playsInline muted />

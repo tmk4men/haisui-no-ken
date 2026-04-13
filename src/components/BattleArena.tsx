@@ -58,19 +58,44 @@ export function BattleArena({ result, playerHp, enemy, onFinished }: {
             </div>
           </div>
           <div>
-            <div className="aspect-[3/4] rounded-xl bg-gradient-to-b from-rose-950 to-slate-950 ring-1 ring-rose-900/50 grid place-items-center">
-              <div className="text-center">
-                <div className="text-4xl mb-2">👹</div>
-                <div className="font-bold" style={{ fontFamily: "serif" }}>{enemy.name}</div>
-                <div className="text-xs text-slate-500 mt-1">{enemy.element === "magic" ? "読み型" : "拳型"}</div>
-              </div>
-            </div>
+            <EnemyPortrait enemy={enemy} />
             <div className="mt-2">
               <HpBar value={eHp} max={enemy.stats.hp} color="bg-rose-500" label={enemy.name} />
             </div>
           </div>
         </div>
         {pop && <DamagePop {...pop} />}
+      </div>
+    </div>
+  );
+}
+
+function EnemyPortrait({ enemy }: { enemy: Enemy }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-b from-rose-950 to-slate-950 ring-1 ring-rose-900/50">
+      {failed ? (
+        <div className="absolute inset-0 grid place-items-center">
+          <div className="text-center">
+            <div className="text-4xl mb-2">👹</div>
+            <div className="font-kan font-bold">{enemy.name}</div>
+          </div>
+        </div>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`/chara/enemy_${enemy.id}.png`}
+          alt={enemy.name}
+          className="w-full h-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-2 text-center">
+        <div className="font-kan font-bold tracking-wider text-slate-100 drop-shadow">{enemy.name}</div>
+        <div className="text-[10px] text-rose-300/80 mt-0.5 font-kan tracking-widest">
+          {enemy.element === "magic" ? "読み型" : "拳型"}
+        </div>
       </div>
     </div>
   );

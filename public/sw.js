@@ -1,4 +1,4 @@
-const CACHE = "haisui-v1";
+const CACHE = "kandou-v1";
 const ASSETS = ["/"];
 
 self.addEventListener("install", (e) => {

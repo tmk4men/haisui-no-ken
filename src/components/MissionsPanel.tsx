@@ -4,19 +4,40 @@ import { MISSION_LABEL } from "@/lib/ui/labels";
 export function MissionsPanel({ missions }: { missions: DailyMission[] }) {
   if (missions.length === 0) return null;
   return (
-    <div className="rounded-xl bg-slate-900 ring-1 ring-slate-800 p-4">
-      <h3 className="text-sm font-semibold text-slate-400 mb-3">今日のシノギ</h3>
-      <div className="space-y-2">
+    <div className="panel-washi rounded-xl p-4">
+      <h3 className="text-xs font-kan text-rose-300/80 mb-3 tracking-[0.2em]">⟢ 今日のシノギ</h3>
+      <div className="space-y-2.5">
         {missions.map(m => {
           const pct = Math.min(100, Math.round((m.progress / m.goal) * 100));
+          const done = m.completed;
           return (
-            <div key={m.id} className={`rounded-lg p-3 ring-1 ${m.completed ? "bg-emerald-900/30 ring-emerald-700" : "bg-slate-950 ring-slate-800"}`}>
-              <div className="flex justify-between text-sm mb-1">
-                <span>{MISSION_LABEL[m.type]} {m.progress}/{m.goal}</span>
-                <span className="text-xs text-slate-400">報酬 EXP+{m.rewardExp}</span>
+            <div
+              key={m.id}
+              className={`relative rounded-md p-3 border overflow-hidden ${
+                done ? "border-emerald-700/60 bg-emerald-950/20" : "border-slate-800 bg-black/30"
+              }`}
+            >
+              {done && (
+                <span className="stamp-cleared absolute top-2 right-2 pointer-events-none">
+                  完了
+                </span>
+              )}
+              <div className="flex justify-between items-baseline text-sm mb-1.5 pr-14">
+                <span className="font-kan text-slate-100 tracking-wide">
+                  {MISSION_LABEL[m.type]}
+                  <span className="ml-2 font-mono text-xs text-slate-400">{m.progress}/{m.goal}</span>
+                </span>
+                <span className="text-[10px] text-amber-300/80 font-kan shrink-0">EXP+{m.rewardExp}</span>
               </div>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                <div className={`h-full ${m.completed ? "bg-emerald-400" : "bg-sky-500"}`} style={{ width: `${pct}%` }} />
+              <div className="bar-track h-2 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${
+                    done
+                      ? "bg-gradient-to-r from-emerald-500 to-emerald-300"
+                      : "bg-gradient-to-r from-rose-700 via-rose-500 to-amber-400"
+                  }`}
+                  style={{ width: `${pct}%`, boxShadow: done ? "0 0 8px rgba(52,211,153,0.5)" : "0 0 8px rgba(239,68,68,0.35)" }}
+                />
               </div>
             </div>
           );

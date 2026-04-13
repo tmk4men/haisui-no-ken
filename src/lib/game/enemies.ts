@@ -12,6 +12,8 @@ export type Enemy = {
 };
 
 export const ENEMIES: Enemy[] = [
+  // 序章 — 酔客
+  { id: "yoidore", name: "酔いどれの親父", chapter: "序章 — 酔客", taunt: "おぉ……お前、ちょっと、金……貸せや……ぅぷ。", element: "physical", weakness: "physical", stats: { hp: 15, attack: 3, defense: 1, magic: 0, focus: 0, speed: 2 }, expReward: 10 },
   // 第一章 — 路地裏
   { id: "kamashi", name: "かまし屋ジン", chapter: "第一章 — 路地裏", taunt: "オイ、カツアゲじゃねえ、挨拶だよ。", element: "physical", weakness: "physical", stats: { hp: 30, attack: 6, defense: 2, magic: 0, focus: 0, speed: 4 }, expReward: 20 },
   { id: "chinpira", name: "ツメ甘のチンピラ", chapter: "第一章 — 路地裏", taunt: "ビビってんじゃねえよ、ア？", element: "physical", weakness: "physical", stats: { hp: 40, attack: 7, defense: 3, magic: 0, focus: 2, speed: 6 }, expReward: 28 },

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { usePoseDetection } from "@/hooks/usePoseDetection";
 import { useGameState } from "@/hooks/useGameState";
 import { PlankDetector } from "@/lib/pose/plankDetector";
+import { TrainBanner } from "@/components/TrainBanner";
 
 export default function PlankPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -44,8 +45,8 @@ export default function PlankPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">プランク</h2>
-      <p className="text-sm text-slate-400">肩→腰→足首が一直線なら保持中としてカウント。</p>
+      <TrainBanner src="/bg/plank.png" title="我慢・プランク" desc="耐えろ、退くな" />
+      <p className="text-xs text-slate-400 font-kan">肩→腰→足首が一直線なら保持中としてカウント。</p>
 
       <div className="relative rounded-xl overflow-hidden bg-black aspect-video ring-1 ring-slate-800">
         <video ref={videoRef} className="w-full h-full object-contain" playsInline muted />
