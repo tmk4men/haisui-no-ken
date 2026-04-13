@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-export function CharaPortrait({ src = "/chara/main.png", className = "" }: { src?: string; className?: string }) {
+export function CharaPortrait({ src = "/chara/main.webp", className = "" }: { src?: string; className?: string }) {
   const [failed, setFailed] = useState(false);
   return (
     <div className={`relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-b from-slate-800 to-slate-950 ring-1 ring-slate-800 ${className}`}>
@@ -10,7 +10,7 @@ export function CharaPortrait({ src = "/chara/main.png", className = "" }: { src
           <div className="text-center">
             <div className="text-5xl mb-2">🥷</div>
             <div>立ち絵は後日差し替え</div>
-            <div className="opacity-60">public/chara/main.png</div>
+            <div className="opacity-60">public/chara/main.webp</div>
           </div>
         </div>
       ) : (

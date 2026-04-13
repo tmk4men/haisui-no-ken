@@ -9,7 +9,6 @@ import { PwaRegister } from "@/components/PwaRegister";
 import { AchievementToast } from "@/components/AchievementToast";
 import { WeeklyReportModal } from "@/components/WeeklyReport";
 import { ReminderScheduler } from "@/components/ReminderScheduler";
-import { BikeLoader } from "@/components/BikeLoader";
 import { TITLE, TITLE_SUB, TITLE_MARK, TAGLINE } from "@/lib/ui/labels";
 import { NAV_ICONS } from "@/components/icons";
 
@@ -28,15 +27,15 @@ export const metadata: Metadata = {
     title: `${OG_TITLE} — ${TAGLINE}`,
     description: `${TAGLINE} 筋トレ・勉強・日々の鍛錬を刻むライフRPG。`,
     locale: "ja_JP",
-    images: [{ url: "/chara/ogp.png", width: 1200, height: 630, alt: OG_TITLE }],
+    images: [{ url: "/chara/ogp.webp", width: 1200, height: 630, alt: OG_TITLE }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${OG_TITLE} — ${TAGLINE}`,
     description: TAGLINE,
-    images: ["/chara/ogp.png"],
+    images: ["/chara/ogp.webp"],
   },
-  icons: { icon: "/chara/icon.png", apple: "/chara/icon.png" },
+  icons: { icon: "/chara/icon.webp", apple: "/chara/icon.webp" },
 };
 
 const NAV = [
@@ -53,7 +52,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja" className={`${serifKan.variable} ${brush.variable}`}>
       <body>
-        <BikeLoader />
         <PwaRegister />
         <AchievementToast />
         <WeeklyReportModal />

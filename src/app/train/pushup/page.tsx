@@ -58,7 +58,7 @@ export default function PushupPage() {
 
   return (
     <div className="space-y-4">
-      <TrainBanner src="/bg/pushup.png" title="押し込み・腕立て" desc="地に押し付け、骨に刻め" />
+      <TrainBanner src="/bg/pushup.webp" title="押し込み・腕立て" desc="地に押し付け、骨に刻め" />
       <p className="text-xs text-slate-400 font-kan">肘角度 90°以下で有効。体を横から映すのがおすすめ。</p>
 
       <div className="relative rounded-xl overflow-hidden bg-black aspect-video ring-1 ring-slate-800">

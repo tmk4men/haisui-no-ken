@@ -3,16 +3,18 @@ import { useMemo, useState } from "react";
 import { useGameState } from "@/hooks/useGameState";
 import { ENEMIES, Enemy } from "@/lib/game/enemies";
 import { BattleState, computeExpReward, flavorResult, initBattle } from "@/lib/game/battle";
+import { ITEMS, rollEnemyDrop } from "@/lib/game/items";
 import { levelFromExp } from "@/lib/game/stats";
 import { BattleLog } from "@/components/BattleLog";
 import { BattleArena } from "@/components/BattleArena";
 import { BattleTutorial } from "@/components/BattleTutorial";
 import { levelupLine } from "@/lib/ui/labels";
 
-type Fight = { enemy: Enemy; battle: BattleState; exp: number; firstKill: boolean; leveledUp: boolean; newLevel: number } | null;
+type Drops = { coins: number; walletId?: string };
+type Fight = { enemy: Enemy; battle: BattleState; exp: number; firstKill: boolean; leveledUp: boolean; newLevel: number; drops?: Drops } | null;
 
 export default function BattlePage() {
-  const { state, derived, derivedFull, recordBattle } = useGameState();
+  const { state, derived, derivedFull, recordBattle, consumeBattleItem } = useGameState();
   const [enemy, setEnemy] = useState<Enemy | null>(null);
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [result, setResult] = useState<Fight>(null);
@@ -31,6 +33,7 @@ export default function BattlePage() {
   if (!state || !derived || !derivedFull) return <div className="text-slate-400 font-kan">読み込み中…</div>;
 
   const startFight = (e: Enemy) => {
+    if ((state?.worldHp ?? 0) <= 0) return;
     setEnemy(e);
     setBattle(initBattle(derived, e));
     setResult(null);
@@ -45,8 +48,9 @@ export default function BattlePage() {
     const actualExp = Math.round(baseExp * derivedFull.expMult);
     const prevLevel = state.character.level;
     const newLevel = levelFromExp(state.character.exp + actualExp);
-    recordBattle({ enemyId: enemy.id, result: winner === "player" ? "win" : "lose", expGained: baseExp });
-    setResult({ enemy, battle: finalBattle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel });
+    const drops: Drops | undefined = winner === "player" ? rollEnemyDrop(enemy.expReward) : undefined;
+    recordBattle({ enemyId: enemy.id, result: winner === "player" ? "win" : "lose", expGained: baseExp }, drops);
+    setResult({ enemy, battle: finalBattle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel, drops });
     setPhase("result");
   };
 
@@ -59,8 +63,15 @@ export default function BattlePage() {
       <BattleTutorial />
       <h2 className="font-brush text-2xl ink-title blood-stroke">出入り</h2>
 
-      {phase === "select" && (
+      {phase === "select" && (state.worldHp ?? 0) <= 0 && (
+        <div className="panel-washi rounded-xl p-5 text-center border border-rose-800/60">
+          <div className="font-brush text-xl ink-title text-rose-200">体力が尽きた</div>
+          <div className="text-xs text-slate-400 font-kan mt-2">しばらく休むか、お守り・湯呑みで回復しろ。</div>
+        </div>
+      )}
+      {phase === "select" && (state.worldHp ?? 0) > 0 && (
         <>
+          <div className="text-xs text-rose-300 font-kan">体力 {state.worldHp}/{state.worldHpMax ?? 5}（敗北で -1）</div>
           {state.winStreak > 0 && (
             <div className="text-xs text-emerald-300 font-kan">勝 {state.winStreak}連勝中（EXP x{Math.min(1.5, 1 + state.winStreak * 0.1).toFixed(1)}）</div>
           )}
@@ -106,6 +117,13 @@ export default function BattlePage() {
           derived={derived}
           enemy={enemy}
           playerSkills={state.character.skills}
+          inventory={state.inventory ?? {}}
+          onUseBattleItem={(id) => {
+            const item = ITEMS[id];
+            if (!item || item.kind !== "battle-heal" || !item.healAmount) return null;
+            if (!consumeBattleItem(id)) return null;
+            return { healAmount: item.healAmount, name: item.name };
+          }}
           onFinished={onFinished}
           busy={false}
         />
@@ -122,8 +140,17 @@ export default function BattlePage() {
             <div className="text-sm mt-2 font-kan">
               {result.battle.over === "player"
                 ? <>EXP +{result.exp}{result.firstKill && " 《初討伐》"}</>
-                : <>EXP 0 — 明日の拳に、倍返しを乗せる。</>}
+                : <>EXP 0 — 体力 -1、明日の拳に倍返しを乗せる。</>}
             </div>
+            {result.drops && result.battle.over === "player" && (
+              <div className="mt-3 text-amber-200 font-kan text-sm">
+                ◎ コイン +{result.drops.coins}
+                {result.drops.walletId && (() => {
+                  const w = ITEMS[result.drops!.walletId!];
+                  return w ? <> / 《{w.name}》を拾った（中に{w.coinContents}コイン）</> : null;
+                })()}
+              </div>
+            )}
             {result.leveledUp && (
               <div className="mt-3 text-amber-300 font-brush text-lg">
                 Lv.{result.newLevel} — {levelupLine(result.newLevel)}

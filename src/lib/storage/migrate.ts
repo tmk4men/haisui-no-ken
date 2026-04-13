@@ -34,6 +34,14 @@ export function migrate(raw: AnyRec): GameState {
     state.character = char;
   }
 
+  if (v < 4) {
+    state.worldHp = (state.worldHp as number | undefined) ?? 5;
+    state.worldHpMax = (state.worldHpMax as number | undefined) ?? 5;
+    state.worldHpLastRecoverAt = (state.worldHpLastRecoverAt as number | undefined) ?? Date.now();
+    state.coins = (state.coins as number | undefined) ?? 0;
+    state.inventory = (state.inventory as Record<string, number> | undefined) ?? {};
+  }
+
   state.version = STATE_VERSION;
   return state as unknown as GameState;
 }

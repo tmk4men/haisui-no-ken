@@ -5,22 +5,27 @@ import { NavCard } from "@/components/NavCard";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { WeeklyChart } from "@/components/WeeklyChart";
 import { CharaPortrait } from "@/components/CharaPortrait";
+import { ShopInventory } from "@/components/ShopInventory";
+import { OpeningSplash } from "@/components/OpeningSplash";
 import { NAV_ICONS } from "@/components/icons";
 import { EXP_PER_LEVEL } from "@/lib/game/constants";
 
 export default function HomePage() {
-  const { state, derived, todayStats, revengeActive } = useGameState();
+  const { state, derived, todayStats, revengeActive, buyItem, useWorldItem } = useGameState();
   if (!state || !derived || !todayStats) return <div className="text-slate-400 font-kan">読み込み中…</div>;
   const c = state.character;
   const expInLevel = c.exp % EXP_PER_LEVEL;
   const expPct = Math.min(100, Math.round((expInLevel / EXP_PER_LEVEL) * 100));
+  const worldHp = state.worldHp ?? 5;
+  const worldHpMax = state.worldHpMax ?? 5;
   return (
     <div className="space-y-6">
+      <OpeningSplash />
       <section className="panel-washi rounded-xl p-5 relative overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 bg-cover bg-center opacity-50 pointer-events-none"
-          style={{ backgroundImage: "url('/chara/hero-bg.png')" }}
+          style={{ backgroundImage: "url('/chara/hero-bg.webp')" }}
         />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30 pointer-events-none" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
@@ -47,7 +52,24 @@ export default function HomePage() {
               </div>
             </div>
 
+            <div className="pt-2">
+              <div className="flex justify-between text-[10px] text-slate-400 font-kan mb-1">
+                <span>体力</span>
+                <span className="font-mono text-rose-300">{worldHp}/{worldHpMax}</span>
+              </div>
+              <div className="flex gap-1">
+                {Array.from({ length: worldHpMax }).map((_, i) => (
+                  <div key={i} className={`flex-1 h-2 rounded-sm border ${
+                    i < worldHp ? "bg-rose-500 border-rose-300 shadow-[0_0_6px_rgba(244,63,94,0.6)]" : "bg-slate-900 border-slate-700"
+                  }`} />
+                ))}
+              </div>
+            </div>
+
             <div className="flex flex-wrap gap-1.5 pt-2">
+              <span className="inline-flex items-center text-[10px] font-kan tracking-wider px-2 py-0.5 rounded-sm border border-amber-600/60 text-amber-200 bg-amber-950/30">
+                ◎ {state.coins ?? 0} コイン
+              </span>
               {c.skillPoints > 0 && <Badge tone="gold">◈ 技{c.skillPoints}</Badge>}
               <Badge tone="amber">炎 {state.streak}日連続</Badge>
               {state.winStreak > 0 && <Badge tone="emerald">勝 {state.winStreak}連勝</Badge>}
@@ -60,19 +82,25 @@ export default function HomePage() {
         <div className="relative mt-4">
           <MissionsPanel missions={todayStats.missions} />
         </div>
-      </section>
 
-      <section className="panel-washi rounded-xl p-4">
-        <h3 className="text-xs font-kan text-rose-300/80 mb-3 tracking-[0.2em]">⟢ 今日刻んだ分</h3>
-        <div className="grid grid-cols-4 gap-2 text-center">
-          <Tile label="スクワ" value={todayStats.squatReps} color="text-rose-300" />
-          <Tile label="腕立て" value={todayStats.pushupReps} color="text-rose-300" />
-          <Tile label="プランク" value={`${Math.floor(todayStats.plankSec)}秒`} color="text-amber-300" />
-          <Tile label="読込分" value={todayStats.studyMin} color="text-sky-300" />
+        <div className="relative mt-5 pt-4 border-t border-slate-800/70">
+          <h3 className="text-xs font-kan text-rose-300/80 mb-3 tracking-[0.2em]">⟢ 今日刻んだ分</h3>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <Tile label="スクワ" value={todayStats.squatReps} color="text-rose-300" />
+            <Tile label="腕立て" value={todayStats.pushupReps} color="text-rose-300" />
+            <Tile label="プランク" value={`${Math.floor(todayStats.plankSec)}秒`} color="text-amber-300" />
+            <Tile label="読込分" value={todayStats.studyMin} color="text-sky-300" />
+          </div>
+        </div>
+
+        <div className="relative mt-5 pt-4 border-t border-slate-800/70">
+          <WeeklyChart state={state} />
+        </div>
+
+        <div className="relative mt-5 pt-4 border-t border-slate-800/70">
+          <ShopInventory state={state} onBuy={buyItem} onUseWorldItem={useWorldItem} />
         </div>
       </section>
-
-      <WeeklyChart state={state} />
 
       <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <NavCard href="/train" title="シバキ上げ" desc="スクワ/腕立/プランク" Icon={NAV_ICONS.train} />

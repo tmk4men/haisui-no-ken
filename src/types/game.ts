@@ -89,8 +89,15 @@ export type Settings = {
   reminderTime: string; // "HH:MM"
 };
 
+export type Inventory = Record<string, number>;
+
 export type GameState = {
   version: number;
+  worldHp: number;
+  worldHpMax: number;
+  worldHpLastRecoverAt: number;
+  coins: number;
+  inventory: Inventory;
   character: Character;
   squats: SquatSession[];
   pushups: PushupSession[];

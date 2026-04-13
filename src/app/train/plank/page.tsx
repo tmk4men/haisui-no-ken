@@ -45,7 +45,7 @@ export default function PlankPage() {
 
   return (
     <div className="space-y-4">
-      <TrainBanner src="/bg/plank.png" title="我慢・プランク" desc="耐えろ、退くな" />
+      <TrainBanner src="/bg/plank.webp" title="我慢・プランク" desc="耐えろ、退くな" />
       <p className="text-xs text-slate-400 font-kan">肩→腰→足首が一直線なら保持中としてカウント。</p>
 
       <div className="relative rounded-xl overflow-hidden bg-black aspect-video ring-1 ring-slate-800">

@@ -8,6 +8,7 @@ import { todayKey, addDays, diffDays } from "@/lib/game/date";
 import { generateDailyMissions, advanceMission } from "@/lib/game/missions";
 import { evaluateAchievements, ACHIEVEMENTS, Achievement } from "@/lib/game/achievements";
 import { checkUnlocks } from "@/lib/game/equipment";
+import { ITEMS, WORLD_HP_MAX, WORLD_HP_RECOVER_MS } from "@/lib/game/items";
 
 function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -16,6 +17,11 @@ function uid(): string {
 function initialState(): GameState {
   return {
     version: STATE_VERSION,
+    worldHp: 5,
+    worldHpMax: 5,
+    worldHpLastRecoverAt: Date.now(),
+    coins: 0,
+    inventory: {},
     character: {
       id: uid(), name: "主人公", level: 1, exp: 0,
       base: { body: 0, mind: 0, discipline: 0 },
@@ -37,6 +43,23 @@ function ensureTodayMissions(state: GameState): GameState {
   const pruned: GameState["missions"] = {};
   for (const [k, v] of Object.entries(missions)) if (keep.has(k)) pruned[k] = v;
   return { ...state, missions: pruned };
+}
+
+function tickWorldHp(state: GameState): GameState {
+  const max = state.worldHpMax ?? WORLD_HP_MAX;
+  if (state.worldHp >= max) {
+    return state.worldHpLastRecoverAt ? state : { ...state, worldHpLastRecoverAt: Date.now() };
+  }
+  const now = Date.now();
+  const last = state.worldHpLastRecoverAt ?? now;
+  const elapsed = now - last;
+  if (elapsed < WORLD_HP_RECOVER_MS) return state;
+  const ticks = Math.min(max - state.worldHp, Math.floor(elapsed / WORLD_HP_RECOVER_MS));
+  return {
+    ...state,
+    worldHp: Math.min(max, state.worldHp + ticks),
+    worldHpLastRecoverAt: last + ticks * WORLD_HP_RECOVER_MS,
+  };
 }
 
 function pruneBuffs(state: GameState): GameState {
@@ -108,7 +131,7 @@ export function useGameState() {
 
   useEffect(() => {
     const loaded = localStorageAdapter.load() ?? initialState();
-    setState(pruneBuffs(ensureTodayMissions(loaded)));
+    setState(tickWorldHp(pruneBuffs(ensureTodayMissions(loaded))));
   }, []);
 
   useEffect(() => { if (state) localStorageAdapter.save(state); }, [state]);
@@ -218,7 +241,10 @@ export function useGameState() {
     });
   }, [finalize]);
 
-  const recordBattle = useCallback((rec: Omit<BattleRecord, "id" | "createdAt">) => {
+  const recordBattle = useCallback((
+    rec: Omit<BattleRecord, "id" | "createdAt">,
+    drops?: { coins?: number; walletId?: string }
+  ) => {
     setState(prev => {
       if (!prev) return prev;
       const prevLevel = prev.character.level;
@@ -228,16 +254,87 @@ export function useGameState() {
       const won = rec.result === "win";
       const winStreak = won ? prev.winStreak + 1 : 0;
       const buffs = won ? prev.buffs : [...prev.buffs.filter(b => b.kind !== "revenge"), { kind: "revenge" as const, expiresDate: addDays(todayKey(), 1) }];
+
+      let coins = prev.coins;
+      let worldHp = prev.worldHp;
+      let worldHpLastRecoverAt = prev.worldHpLastRecoverAt;
+      if (won && drops) {
+        coins += drops.coins ?? 0;
+        if (drops.walletId) {
+          const wallet = ITEMS[drops.walletId];
+          if (wallet?.coinContents) coins += wallet.coinContents;
+        }
+      }
+      if (!won) {
+        worldHp = Math.max(0, prev.worldHp - 1);
+        if (prev.worldHp === (prev.worldHpMax ?? WORLD_HP_MAX)) worldHpLastRecoverAt = Date.now();
+      }
+
       let next: GameState = {
         ...prev,
         battles: [record, ...prev.battles],
         character: { ...prev.character, exp: newExp, level: levelFromExp(newExp) },
-        winStreak, buffs,
+        winStreak, buffs, coins, worldHp, worldHpLastRecoverAt,
       };
       if (won) next = applyMissionProgress(next, "battleWin", 1);
       return finalize(prevLevel)(next);
     });
   }, [finalize]);
+
+  const buyItem = useCallback((itemId: string): boolean => {
+    const item = ITEMS[itemId];
+    if (!item || item.price == null) return false;
+    let ok = false;
+    setState(prev => {
+      if (!prev) return prev;
+      if (prev.coins < item.price!) return prev;
+      ok = true;
+      return {
+        ...prev,
+        coins: prev.coins - item.price!,
+        inventory: { ...prev.inventory, [itemId]: (prev.inventory[itemId] ?? 0) + 1 },
+      };
+    });
+    return ok;
+  }, []);
+
+  const useWorldItem = useCallback((itemId: string): boolean => {
+    const item = ITEMS[itemId];
+    if (!item || item.kind !== "world-heal" || !item.healAmount) return false;
+    let ok = false;
+    setState(prev => {
+      if (!prev) return prev;
+      const cnt = prev.inventory[itemId] ?? 0;
+      if (cnt <= 0) return prev;
+      const max = prev.worldHpMax ?? WORLD_HP_MAX;
+      if (prev.worldHp >= max) return prev;
+      ok = true;
+      const inv = { ...prev.inventory, [itemId]: cnt - 1 };
+      if (inv[itemId] <= 0) delete inv[itemId];
+      return {
+        ...prev,
+        inventory: inv,
+        worldHp: Math.min(max, prev.worldHp + item.healAmount!),
+      };
+    });
+    return ok;
+  }, []);
+
+  const consumeBattleItem = useCallback((itemId: string): boolean => {
+    const item = ITEMS[itemId];
+    if (!item || item.kind !== "battle-heal") return false;
+    let ok = false;
+    setState(prev => {
+      if (!prev) return prev;
+      const cnt = prev.inventory[itemId] ?? 0;
+      if (cnt <= 0) return prev;
+      ok = true;
+      const inv = { ...prev.inventory, [itemId]: cnt - 1 };
+      if (inv[itemId] <= 0) delete inv[itemId];
+      return { ...prev, inventory: inv };
+    });
+    return ok;
+  }, []);
 
   const learnSkill = useCallback((skillId: string) => {
     setState(prev => {
@@ -287,6 +384,7 @@ export function useGameState() {
     state, derived: derivedFull?.derived ?? null, derivedFull, todayStats, revengeActive,
     addSquats, addPushups, addPlank, addStudy, recordBattle,
     learnSkill, equip, updateSettings, renameCharacter, markWeeklyReportShown,
+    buyItem, useWorldItem, consumeBattleItem,
     reset, replaceState,
     newlyAchieved, ackAchievements,
     achievementList: ACHIEVEMENTS,

@@ -3,20 +3,22 @@ import { useMemo, useState } from "react";
 import { BattleState, PlayerAction, Action, resolveTurn, canUseTech } from "@/lib/game/battle";
 import { Enemy } from "@/lib/game/enemies";
 import { Technique, TECHNIQUES } from "@/lib/game/techniques";
-import { DerivedStats, GameState } from "@/types/game";
+import { DerivedStats } from "@/types/game";
 import { HpBar } from "./HpBar";
 import { CharaPortrait } from "./CharaPortrait";
 import { SpecialMoveFlash } from "./SpecialMoveFlash";
 import { SFX } from "@/lib/audio/sfx";
 
 export function BattleArena({
-  state, setState, derived, enemy, playerSkills, onFinished, busy,
+  state, setState, derived, enemy, playerSkills, inventory, onUseBattleItem, onFinished, busy,
 }: {
   state: BattleState;
   setState: (s: BattleState) => void;
   derived: DerivedStats;
   enemy: Enemy;
   playerSkills: string[];
+  inventory?: Record<string, number>;
+  onUseBattleItem?: (id: string) => { healAmount: number; name: string } | null;
   onFinished: (finalState: BattleState) => void;
   busy: boolean;
 }) {
@@ -46,6 +48,26 @@ export function BattleArena({
     if (log.enemyDamage > 0 && !techName) setTimeout(() => SFX.hit(), 80);
     setState(next);
     if (next.over) setTimeout(() => onFinished(next), 900);
+    setTechOpen(false);
+  };
+
+  const nigiriCount = inventory?.["nigiri"] ?? 0;
+  const useNigiri = () => {
+    if (state.over || busy || nigiriCount <= 0) return;
+    if (state.player.hp >= state.player.maxHp) return;
+    const info = onUseBattleItem?.("nigiri");
+    if (!info) return;
+    const next = resolveTurn(state, { type: "guard" }, derived, enemy);
+    const healed = Math.min(state.player.maxHp, next.player.hp + info.healAmount);
+    const logs = [...next.log];
+    const last = logs[logs.length - 1];
+    logs[logs.length - 1] = {
+      ...last,
+      notes: [`《${info.name}》を頬張った — HP+${info.healAmount}`, ...last.notes],
+    };
+    const patched = { ...next, player: { ...next.player, hp: healed }, log: logs };
+    setState(patched);
+    if (patched.over) setTimeout(() => onFinished(patched), 900);
     setTechOpen(false);
   };
 
@@ -83,13 +105,28 @@ export function BattleArena({
       )}
 
       {!state.over && (
-        <div className="grid grid-cols-4 gap-2">
-          <CmdBtn label="拳" sub="速い" icon="拳" onClick={() => act({ type: "punch" })} disabled={busy} />
-          <CmdBtn label="蹴り" sub="重い/技潰し" icon="脚" onClick={() => act({ type: "kick" })} disabled={busy} />
-          <CmdBtn label="ガード" sub="被ダメ減" icon="盾" onClick={() => act({ type: "guard" })} disabled={busy} />
-          <CmdBtn label="技" sub={`${ownedTechs.length}種`} icon="技" onClick={() => setTechOpen(v => !v)}
-                  disabled={busy || ownedTechs.length === 0} active={techOpen} />
-        </div>
+        <>
+          <div className="grid grid-cols-4 gap-2">
+            <CmdBtn label="拳" sub="速い" icon="拳" onClick={() => act({ type: "punch" })} disabled={busy} />
+            <CmdBtn label="蹴り" sub="重い/技潰し" icon="脚" onClick={() => act({ type: "kick" })} disabled={busy} />
+            <CmdBtn label="ガード" sub="被ダメ減" icon="盾" onClick={() => act({ type: "guard" })} disabled={busy} />
+            <CmdBtn label="技" sub={`${ownedTechs.length}種`} icon="技" onClick={() => setTechOpen(v => !v)}
+                    disabled={busy || ownedTechs.length === 0} active={techOpen} />
+          </div>
+          {nigiriCount > 0 && (
+            <button
+              onClick={useNigiri}
+              disabled={busy || state.player.hp >= state.player.maxHp}
+              className={`w-full rounded-lg py-2 border font-kan text-sm transition ${
+                state.player.hp >= state.player.maxHp
+                  ? "border-slate-800 bg-black/40 opacity-40"
+                  : "border-amber-700 bg-amber-950/40 hover:bg-amber-900/40 text-amber-100"
+              }`}
+            >
+              握り飯を食う（HP+15 / 残 {nigiriCount}）
+            </button>
+          )}
+        </>
       )}
 
       {techOpen && !state.over && (
@@ -185,7 +222,7 @@ function EnemyPortrait({ enemy }: { enemy: Enemy }) {
         </div>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/chara/enemy_${enemy.id}.png`} alt={enemy.name}
+        <img src={`/chara/enemy_${enemy.id}.webp`} alt={enemy.name}
              className="w-full h-full object-cover" onError={() => setFailed(true)} />
       )}
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />

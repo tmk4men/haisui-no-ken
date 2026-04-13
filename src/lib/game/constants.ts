@@ -1,4 +1,4 @@
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 4;
 
 export const GROWTH = {
   bodyPerSquatBase: 0.1,

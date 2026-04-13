@@ -61,7 +61,7 @@ export default function SquatPage() {
 
   return (
     <div className="space-y-4">
-      <TrainBanner src="/bg/squat.png" title="シバキ上げ・スクワット" desc="深く沈め、脚に刻め" />
+      <TrainBanner src="/bg/squat.webp" title="シバキ上げ・スクワット" desc="深く沈め、脚に刻め" />
       <div className="flex justify-end">
         <Link href="/train/squat/manual" className="text-xs text-slate-400 underline">カメラなしモード</Link>
       </div>
