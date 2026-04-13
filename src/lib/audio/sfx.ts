@@ -79,35 +79,48 @@ export function playBikeLoader(opts: { durationMs?: number; fadeMs?: number } = 
   if (vol <= 0) return;
   const duration = opts.durationMs ?? 4000;
   const fade = opts.fadeMs ?? 1200;
-  const audio = new Audio("/sfx/bike.mp3");
-  audio.preload = "auto";
-  audio.volume = Math.max(0, Math.min(1, vol * 0.8));
-  audio.play().catch(() => {
-    // フォールバック（シンセの爆音模倣）
-    const a = ac(); if (!a) return;
-    const osc = a.createOscillator(); const g = a.createGain();
-    osc.type = "sawtooth"; osc.frequency.value = 70;
-    g.gain.value = 0.06 * vol;
-    osc.connect(g).connect(a.destination);
-    osc.start();
-    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration / 1000);
-    osc.stop(a.currentTime + duration / 1000);
-  });
-  // フェードアウト
-  const start = duration - fade;
-  const startVol = audio.volume;
-  const tFade = setTimeout(() => {
-    const steps = 20;
-    let i = 0;
-    const iv = setInterval(() => {
-      i++;
-      const ratio = 1 - i / steps;
-      audio.volume = Math.max(0, startVol * ratio);
-      if (i >= steps) clearInterval(iv);
-    }, fade / 20);
-  }, start);
-  const tStop = setTimeout(() => { try { audio.pause(); audio.src = ""; } catch {} }, duration);
-  return () => { clearTimeout(tFade); clearTimeout(tStop); try { audio.pause(); } catch {} };
+
+  const runFade = (audio: HTMLAudioElement) => {
+    const start = duration - fade;
+    const startVol = audio.volume;
+    setTimeout(() => {
+      const steps = 20; let i = 0;
+      const iv = setInterval(() => {
+        i++;
+        audio.volume = Math.max(0, startVol * (1 - i / steps));
+        if (i >= steps) clearInterval(iv);
+      }, fade / 20);
+    }, start);
+    setTimeout(() => { try { audio.pause(); audio.src = ""; } catch {} }, duration);
+  };
+
+  const start = (byGesture = false) => {
+    const audio = new Audio("/sfx/bike.mp3");
+    audio.preload = "auto";
+    audio.volume = Math.max(0, Math.min(1, vol * 0.8));
+    const p = audio.play();
+    if (p && typeof p.catch === "function") {
+      p.then(() => runFade(audio)).catch(() => {
+        if (byGesture) return; // 既にジェスチャで再試行してもダメ→諦め
+        // 初回ブロック時：最初のユーザー操作で再生
+        const handler = () => {
+          off();
+          start(true);
+        };
+        const off = () => {
+          window.removeEventListener("pointerdown", handler);
+          window.removeEventListener("keydown", handler);
+          window.removeEventListener("touchstart", handler);
+        };
+        window.addEventListener("pointerdown", handler, { once: true });
+        window.addEventListener("keydown", handler, { once: true });
+        window.addEventListener("touchstart", handler, { once: true });
+      });
+    } else {
+      runFade(audio);
+    }
+  };
+  start();
 }
 
 export const SFX = {
