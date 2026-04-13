@@ -49,6 +49,9 @@ export function BattleArena({
       else if (log.playerDamage > 0 || log.enemyDamage > 0) SFX.rep();
     }
     if (log.enemyDamage > 0 && !techName) setTimeout(() => SFX.hit(), 80);
+    // 攻撃が当たったら打撃音（敵被弾/自被弾それぞれ）
+    if (log.playerDamage > 0) SFX.strike();
+    if (log.enemyDamage > 0) setTimeout(() => SFX.strike(), 120);
     if (log.playerDamage > 0) setPopEnemy({ amount: log.playerDamage, key: Date.now() });
     if (log.enemyDamage > 0) setPopPlayer({ amount: log.enemyDamage, key: Date.now() + 1 });
     setState(next);

@@ -123,7 +123,13 @@ export function playBikeLoader(opts: { durationMs?: number; fadeMs?: number } = 
   start();
 }
 
+export function playStrike() {
+  const i = 1 + Math.floor(Math.random() * 8);
+  play(`/sfx/strike/hit${i}.mp3`, () => beep(700, 90, "square", 0.06), 0.9);
+}
+
 export const SFX = {
+  strike: playStrike,
   rep:    () => play("/sfx/punch.mp3",   () => beep(880, 80, "sine", 0.05), 0.8),
   deep:   () => play("/sfx/kick.mp3",    () => beep(1200, 150, "triangle", 0.06), 0.9),
   guard:  () => play("/sfx/guard.mp3",   () => beep(400, 120, "square", 0.06), 0.7),
