@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useGameState } from "@/hooks/useGameState";
+import { PageHero } from "@/components/PageHero";
 
 const SUBJECTS = ["数学", "英語", "プログラミング", "読書", "資格", "その他"];
 
@@ -18,8 +19,7 @@ export default function StudyPage() {
 
   return (
     <div className="space-y-5">
-      <h2 className="font-brush text-2xl ink-title blood-stroke">読み込み</h2>
-      <p className="text-[11px] text-slate-400 font-kan tracking-widest">頭を研ぐ。刻んだ分だけ、知略は深まる。</p>
+      <PageHero image="/chara/勉強.webp" title="読み込み" desc="頭を研ぐ。刻んだ分だけ、知略は深まる。" />
 
       <div className="panel-washi rounded-xl p-4 space-y-4">
         <div>
