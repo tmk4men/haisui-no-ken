@@ -6,23 +6,31 @@ export type Skill = {
   name: string;
   desc: string;
   kind: "growth" | "derived" | "battle" | "technique";
+  coinPrice: number;
   apply: (ctx: { derived?: DerivedStats; bodyMult?: number; mindMult?: number; expMult?: number; critBonus?: number }) => void;
 };
 
+const TECH_PRICES: Record<string, number> = {
+  tech_konshin: 40,
+  tech_yomikiri: 45,
+  tech_fudou: 50,
+  tech_hadou: 90,
+};
+
 export const SKILLS: Skill[] = [
-  { id: "ironFist", name: "鉄拳", desc: "剛撃+20%", kind: "derived",
+  { id: "ironFist", name: "鉄拳", desc: "剛撃+20%", kind: "derived", coinPrice: 35,
     apply: (c) => { if (c.derived) c.derived.attack = Math.round(c.derived.attack * 1.2); } },
-  { id: "steelGut", name: "鋼の肚", desc: "体力+25%", kind: "derived",
+  { id: "steelGut", name: "鋼の肚", desc: "体力+25%", kind: "derived", coinPrice: 40,
     apply: (c) => { if (c.derived) c.derived.hp = Math.round(c.derived.hp * 1.25); } },
-  { id: "coldBlood", name: "冷血", desc: "クリティカル確率+8%", kind: "battle",
+  { id: "coldBlood", name: "冷血", desc: "クリティカル確率+8%", kind: "battle", coinPrice: 30,
     apply: (c) => { c.critBonus = (c.critBonus ?? 0) + 0.08; } },
-  { id: "swift", name: "疾風", desc: "機敏+30%", kind: "derived",
+  { id: "swift", name: "疾風", desc: "機敏+30%", kind: "derived", coinPrice: 35,
     apply: (c) => { if (c.derived) c.derived.speed = Math.round(c.derived.speed * 1.3); } },
-  { id: "diligent", name: "勤勉", desc: "勉強時の頭上昇+20%", kind: "growth",
+  { id: "diligent", name: "勤勉", desc: "勉強時の頭上昇+20%", kind: "growth", coinPrice: 25,
     apply: (c) => { c.mindMult = (c.mindMult ?? 1) * 1.2; } },
-  { id: "beast", name: "獣性", desc: "筋トレ時の拳上昇+20%", kind: "growth",
+  { id: "beast", name: "獣性", desc: "筋トレ時の拳上昇+20%", kind: "growth", coinPrice: 25,
     apply: (c) => { c.bodyMult = (c.bodyMult ?? 1) * 1.2; } },
-  { id: "hunter", name: "目利き", desc: "獲得EXP+15%", kind: "growth",
+  { id: "hunter", name: "目利き", desc: "獲得EXP+15%", kind: "growth", coinPrice: 50,
     apply: (c) => { c.expMult = (c.expMult ?? 1) * 1.15; } },
   // --- 戦闘技（バトル中に使用、気力消費） ---
   ...TECHNIQUES.map<Skill>(t => ({
@@ -30,6 +38,7 @@ export const SKILLS: Skill[] = [
     name: t.name,
     desc: `戦闘技・気力${t.cost}：${t.flavor}`,
     kind: "technique" as const,
+    coinPrice: TECH_PRICES[t.id] ?? 40,
     apply: () => {},
   })),
 ];

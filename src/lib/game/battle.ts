@@ -18,7 +18,11 @@ export type Side = {
   maxHp: number;
   ki: number;
   maxKi: number;
+  rage: number;     // 0-100 怒ゲージ
 };
+
+export const RAGE_MAX = 100;
+export const RAGE_BONUS = 1.3;
 
 export type TurnLog = {
   turn: number;
@@ -48,8 +52,8 @@ export const KI_REGEN = 1;  // ガード同士でさらに加算される想定
 
 export function initBattle(playerStats: DerivedStats, enemy: Enemy): BattleState {
   return {
-    player: { hp: playerStats.hp, maxHp: playerStats.hp, ki: KI_START, maxKi: KI_MAX },
-    enemy:  { hp: enemy.stats.hp, maxHp: enemy.stats.hp, ki: KI_START, maxKi: KI_MAX },
+    player: { hp: playerStats.hp, maxHp: playerStats.hp, ki: KI_START, maxKi: KI_MAX, rage: 0 },
+    enemy:  { hp: enemy.stats.hp, maxHp: enemy.stats.hp, ki: KI_START, maxKi: KI_MAX, rage: 0 },
     turn: 1,
     over: null,
     log: [],
@@ -199,6 +203,18 @@ export function resolveTurn(
   let playerDamage = 0; // 自→敵
   let enemyDamage = 0;  // 敵→自
 
+  // 怒ゲージが満タンなら今ターンの攻撃に+30%、攻撃後にゼロにする
+  let pRage = state.player.rage ?? 0;
+  let eRage = state.enemy.rage ?? 0;
+  const playerRagedNow = pRage >= RAGE_MAX && playerAct !== "guard" && !pCancelled;
+  const enemyRagedNow  = eRage >= RAGE_MAX && enemyAct !== "guard" && !eCancelled;
+  if (playerRagedNow) { notes.push("怒髪天を衝く！ +30%"); pRage = 0; }
+  if (enemyRagedNow)  { notes.push("敵が怒気を解放 +30%"); eRage = 0; }
+
+  if (playerAct === "kick" && enemyAct === "tech" && eCancelled) {
+    notes.push("潰した！");
+  }
+
   const playerTurn = () => {
     if (pCancelled || playerAct === "guard") return;
     // 敵が不動で受ける
@@ -216,8 +232,9 @@ export function resolveTurn(
       defenderElement: enemy.element, defenderWeakness: enemy.weakness,
       oppAction: enemyAct,
     });
-    playerDamage += r.damage;
-    newEnemyHp = Math.max(0, newEnemyHp - r.damage);
+    const dmg = playerRagedNow ? Math.round(r.damage * RAGE_BONUS) : r.damage;
+    playerDamage += dmg;
+    newEnemyHp = Math.max(0, newEnemyHp - dmg);
     if (r.notes.length) notes.push(...r.notes.map(n => `[自→敵] ${n}`));
   };
 
@@ -237,8 +254,9 @@ export function resolveTurn(
       defenderElement: "physical", defenderWeakness: "magic",
       oppAction: playerAct,
     });
-    enemyDamage += r.damage;
-    newPlayerHp = Math.max(0, newPlayerHp - r.damage);
+    const dmg = enemyRagedNow ? Math.round(r.damage * RAGE_BONUS) : r.damage;
+    enemyDamage += dmg;
+    newPlayerHp = Math.max(0, newPlayerHp - dmg);
     if (r.notes.length) notes.push(...r.notes.map(n => `[敵→自] ${n}`));
   };
 
@@ -265,6 +283,10 @@ export function resolveTurn(
   pKi = Math.min(KI_MAX, pKi + KI_REGEN);
   eKi = Math.min(KI_MAX, eKi + KI_REGEN);
 
+  // 怒ゲージ加算（被ダメージの1.2倍をゲージに）
+  pRage = Math.min(RAGE_MAX, pRage + Math.round(enemyDamage * 1.2));
+  eRage = Math.min(RAGE_MAX, eRage + Math.round(playerDamage * 1.2));
+
   const turnLog: TurnLog = {
     turn: state.turn,
     playerAction: playerAct,
@@ -285,8 +307,8 @@ export function resolveTurn(
   else if (newPlayerHp <= 0 && newEnemyHp <= 0) over = "enemy"; // 念のため
 
   return {
-    player: { ...state.player, hp: newPlayerHp, ki: pKi },
-    enemy:  { ...state.enemy,  hp: newEnemyHp,  ki: eKi },
+    player: { ...state.player, hp: newPlayerHp, ki: pKi, rage: pRage },
+    enemy:  { ...state.enemy,  hp: newEnemyHp,  ki: eKi, rage: eRage },
     turn: state.turn + 1,
     over,
     log: [...state.log, turnLog],

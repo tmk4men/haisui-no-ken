@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useGameState } from "@/hooks/useGameState";
-import { ENEMIES, Enemy } from "@/lib/game/enemies";
+import { ENEMIES, Enemy, isChapterUnlocked } from "@/lib/game/enemies";
 import { BattleState, computeExpReward, flavorResult, initBattle } from "@/lib/game/battle";
 import { ITEMS, rollEnemyDrop } from "@/lib/game/items";
 import { levelFromExp } from "@/lib/game/stats";
@@ -11,7 +11,7 @@ import { BattleTutorial } from "@/components/BattleTutorial";
 import { levelupLine } from "@/lib/ui/labels";
 
 type Drops = { coins: number; walletId?: string };
-type Fight = { enemy: Enemy; battle: BattleState; exp: number; firstKill: boolean; leveledUp: boolean; newLevel: number; drops?: Drops } | null;
+type Fight = { enemy: Enemy; battle: BattleState; exp: number; firstKill: boolean; leveledUp: boolean; newLevel: number; drops?: Drops; coinLost?: number } | null;
 
 export default function BattlePage() {
   const { state, derived, derivedFull, recordBattle, consumeBattleItem } = useGameState();
@@ -49,8 +49,9 @@ export default function BattlePage() {
     const prevLevel = state.character.level;
     const newLevel = levelFromExp(state.character.exp + actualExp);
     const drops: Drops | undefined = winner === "player" ? rollEnemyDrop(enemy.expReward) : undefined;
+    const coinLost = winner === "enemy" ? Math.floor((state.coins ?? 0) * 0.2) : 0;
     recordBattle({ enemyId: enemy.id, result: winner === "player" ? "win" : "lose", expGained: baseExp }, drops);
-    setResult({ enemy, battle: finalBattle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel, drops });
+    setResult({ enemy, battle: finalBattle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel, drops, coinLost });
     setPhase("result");
   };
 
@@ -79,30 +80,42 @@ export default function BattlePage() {
             {ENEMIES.map(e => {
               const killed = killedIds.has(e.id);
               const lost = lostIds.has(e.id) && !killed;
+              const unlocked = isChapterUnlocked(e.chapter, killedIds, ENEMIES);
               return (
-              <button key={e.id} onClick={() => startFight(e)}
-                className={`slash-on-hover text-left relative rounded-xl panel-washi p-4 hover:border-rose-800/60 transition ${killed ? "opacity-80" : ""}`}>
+              <button key={e.id} onClick={() => unlocked && startFight(e)} disabled={!unlocked}
+                className={`slash-on-hover text-left relative rounded-xl panel-washi p-4 transition ${
+                  !unlocked ? "opacity-40 cursor-not-allowed" : "hover:border-rose-800/60"
+                } ${killed ? "opacity-80" : ""}`}>
                 {killed && (
                   <span className="absolute top-2 right-2 stamp-cleared">撃破</span>
                 )}
-                {lost && (
+                {lost && unlocked && (
                   <span className="absolute top-2 right-2 stamp-cleared" style={{ color: "#94a3b8", borderColor: "#475569", background: "rgba(15,23,42,0.5)" }}>敗北</span>
+                )}
+                {!unlocked && (
+                  <span className="absolute top-2 right-2 text-[10px] font-kan tracking-widest text-slate-500 border border-slate-700 bg-black/50 px-2 py-0.5 rounded-sm">封鎖中</span>
                 )}
                 <div className="flex justify-between pr-14">
                   <div>
                     <div className="text-xs text-slate-500 font-kan tracking-widest">{e.chapter}</div>
                     <div className="font-kan font-bold tracking-wider text-slate-100">
-                      {e.name} {!killed && <span className="text-xs text-amber-300 ml-1">初討伐 x1.5</span>}
+                      {unlocked ? e.name : "？？？"} {unlocked && !killed && <span className="text-xs text-amber-300 ml-1">初討伐 x1.5</span>}
                     </div>
-                    <div className="text-xs text-slate-400 italic mt-1 font-kan">「{e.taunt}」</div>
+                    <div className="text-xs text-slate-400 italic mt-1 font-kan">
+                      {unlocked ? `「${e.taunt}」` : "前章を制覇せよ。"}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-400 text-right font-kan shrink-0 ml-2">
-                    {e.element === "magic" ? "読み型" : "拳型"}<br />弱点:{e.weakness === "magic" ? "読み" : "拳"}
+                  {unlocked && (
+                    <div className="text-xs text-slate-400 text-right font-kan shrink-0 ml-2">
+                      {e.element === "magic" ? "読み型" : "拳型"}<br />弱点:{e.weakness === "magic" ? "読み" : "拳"}
+                    </div>
+                  )}
+                </div>
+                {unlocked && (
+                  <div className="text-xs text-slate-500 mt-2 font-mono">
+                    体{e.stats.hp} 剛{e.stats.attack} 受{e.stats.defense} 知{e.stats.magic} 速{e.stats.speed} — EXP{e.expReward}
                   </div>
-                </div>
-                <div className="text-xs text-slate-500 mt-2 font-mono">
-                  体{e.stats.hp} 剛{e.stats.attack} 受{e.stats.defense} 知{e.stats.magic} 速{e.stats.speed} — EXP{e.expReward}
-                </div>
+                )}
               </button>
               );
             })}
@@ -140,7 +153,7 @@ export default function BattlePage() {
             <div className="text-sm mt-2 font-kan">
               {result.battle.over === "player"
                 ? <>EXP +{result.exp}{result.firstKill && " 《初討伐》"}</>
-                : <>EXP 0 — 体力 -1、明日の拳に倍返しを乗せる。</>}
+                : <>EXP 0 — 体力 -1{result.coinLost ? ` / ◎ ${result.coinLost}コイン 落とした` : ""}。明日の拳に倍返しを乗せる。</>}
             </div>
             {result.drops && result.battle.over === "player" && (
               <div className="mt-3 text-amber-200 font-kan text-sm">

@@ -9,6 +9,7 @@ import { generateDailyMissions, advanceMission } from "@/lib/game/missions";
 import { evaluateAchievements, ACHIEVEMENTS, Achievement } from "@/lib/game/achievements";
 import { checkUnlocks } from "@/lib/game/equipment";
 import { ITEMS, WORLD_HP_MAX, WORLD_HP_RECOVER_MS } from "@/lib/game/items";
+import { SKILLS } from "@/lib/game/skills";
 
 function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -265,9 +266,12 @@ export function useGameState() {
           inventory = { ...inventory, [drops.walletId]: (inventory[drops.walletId] ?? 0) + 1 };
         }
       }
+      let coinLost = 0;
       if (!won) {
         worldHp = Math.max(0, prev.worldHp - 1);
         if (prev.worldHp === (prev.worldHpMax ?? WORLD_HP_MAX)) worldHpLastRecoverAt = Date.now();
+        coinLost = Math.floor(prev.coins * 0.2);
+        coins = Math.max(0, coins - coinLost);
       }
 
       let next: GameState = {
@@ -356,7 +360,14 @@ export function useGameState() {
   const learnSkill = useCallback((skillId: string) => {
     setState(prev => {
       if (!prev || prev.character.skillPoints <= 0 || prev.character.skills.includes(skillId)) return prev;
-      return { ...prev, character: { ...prev.character, skills: [...prev.character.skills, skillId], skillPoints: prev.character.skillPoints - 1 } };
+      const skill = SKILLS.find(s => s.id === skillId);
+      const price = skill?.coinPrice ?? 0;
+      if (prev.coins < price) return prev;
+      return {
+        ...prev,
+        coins: prev.coins - price,
+        character: { ...prev.character, skills: [...prev.character.skills, skillId], skillPoints: prev.character.skillPoints - 1 },
+      };
     });
   }, []);
 

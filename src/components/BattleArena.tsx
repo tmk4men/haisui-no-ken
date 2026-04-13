@@ -87,6 +87,7 @@ export function BattleArena({
           </div>
           <HpBar value={state.player.hp} max={state.player.maxHp} color="bg-emerald-500" label="自分" />
           <KiGauge value={state.player.ki} max={state.player.maxKi} />
+          <RageGauge value={state.player.rage ?? 0} />
         </div>
         <div className="space-y-2 relative">
           <div className="relative">
@@ -95,6 +96,7 @@ export function BattleArena({
           </div>
           <HpBar value={state.enemy.hp} max={state.enemy.maxHp} color="bg-rose-500" label={enemy.name} />
           <KiGauge value={state.enemy.ki} max={state.enemy.maxKi} />
+          <RageGauge value={state.enemy.rage ?? 0} />
         </div>
       </div>
 
@@ -215,6 +217,25 @@ function CmdBtn({ label, sub, icon, onClick, disabled, active }: {
       <div className="font-kan text-xs text-slate-200 mt-0.5">{label}</div>
       <div className="text-[9px] text-slate-500 font-kan">{sub}</div>
     </button>
+  );
+}
+
+function RageGauge({ value }: { value: number }) {
+  const pct = Math.max(0, Math.min(100, value));
+  const full = pct >= 100;
+  return (
+    <div>
+      <div className="flex justify-between text-[10px] font-kan mb-0.5">
+        <span className={full ? "text-rose-200 font-bold animate-pulse" : "text-slate-400"}>怒</span>
+        <span className="font-mono text-slate-400">{Math.floor(pct)}/100{full ? " ▶発動" : ""}</span>
+      </div>
+      <div className="h-1.5 bg-slate-800 rounded-sm overflow-hidden">
+        <div
+          className={`h-full ${full ? "bg-gradient-to-r from-rose-500 via-orange-400 to-rose-500 animate-pulse" : "bg-gradient-to-r from-rose-700 to-rose-500"}`}
+          style={{ width: `${pct}%`, boxShadow: full ? "0 0 10px rgba(244,63,94,0.8)" : "none" }}
+        />
+      </div>
+    </div>
   );
 }
 

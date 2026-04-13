@@ -14,6 +14,24 @@ export type Enemy = {
   ai: EnemyAI;
 };
 
+// 章解禁用: 並びを定義。各章の全員撃破で次章解禁。
+export const CHAPTER_ORDER = [
+  "序章 — 酔客",
+  "第一章 — 路地裏",
+  "第二章 — シマ争い",
+  "第三章 — 因縁",
+  "第四章 — 頭脳戦",
+  "終章 — 伝説",
+] as const;
+
+export function isChapterUnlocked(chapter: string, defeatedIds: Set<string>, allEnemies: Enemy[]): boolean {
+  const idx = CHAPTER_ORDER.indexOf(chapter as typeof CHAPTER_ORDER[number]);
+  if (idx <= 0) return true;
+  const prev = CHAPTER_ORDER[idx - 1];
+  const prevEnemies = allEnemies.filter(e => e.chapter === prev);
+  return prevEnemies.every(e => defeatedIds.has(e.id));
+}
+
 export const ENEMIES: Enemy[] = [
   // 序章 — 酔客
   { id: "yoidore", name: "酔いどれの親父", chapter: "序章 — 酔客", taunt: "おぉ……お前、ちょっと、金……貸せや……ぅぷ。", element: "physical", weakness: "physical", stats: { hp: 15, attack: 3, defense: 1, magic: 0, focus: 0, speed: 2 }, expReward: 10, ai: "novice" },
