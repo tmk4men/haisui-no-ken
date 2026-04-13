@@ -16,7 +16,7 @@ export function BattleTutorial() {
       <div className="panel-washi rounded-xl max-w-md w-full p-5 space-y-4 border border-rose-900/60">
         <div className="flex items-baseline gap-2">
           <span className="hanko">心得</span>
-          <h3 className="font-brush text-2xl ink-title">出入りの流れ</h3>
+          <h3 className="font-brush text-2xl ink-title">喧嘩の流れ</h3>
         </div>
         <ul className="space-y-2 text-sm font-kan text-slate-200 tracking-wide">
           <li><b className="text-rose-300">拳</b>：速い基本攻撃。</li>

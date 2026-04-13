@@ -71,7 +71,7 @@ export default function HomePage() {
 
             {worldHp === 0 && (
               <div className="pt-2 panel-washi rounded-lg p-2 border border-rose-700/60 bg-rose-950/30">
-                <div className="text-[11px] text-rose-200 font-kan leading-snug">体力切れ — 出入り不可。湯呑みで全快、お守りで1回復。</div>
+                <div className="text-[11px] text-rose-200 font-kan leading-snug">体力切れ — 喧嘩不可。湯呑みで全快、お守りで1回復。</div>
               </div>
             )}
 
@@ -112,7 +112,7 @@ export default function HomePage() {
       <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <NavCard href="/train" title="シバキ上げ" desc="スクワ/腕立/プランク" Icon={NAV_ICONS.train} />
         <NavCard href="/study" title="読み込み" desc="頭を研ぐ" Icon={NAV_ICONS.study} />
-        <NavCard href="/battle" title="出入り" desc="殴り合い" Icon={NAV_ICONS.battle} />
+        <NavCard href="/battle" title="喧嘩" desc="殴り合い" Icon={NAV_ICONS.battle} />
         <NavCard href="/skills" title="技の覚書" desc="スキル習得" Icon={NAV_ICONS.skills} />
         <NavCard href="/equipment" title="装具" desc="手に入れた装備" Icon={NAV_ICONS.equipment} />
         <NavCard href="/character" title="漢" desc="詳細/実績/データ" Icon={NAV_ICONS.character} />

@@ -63,7 +63,7 @@ export default function BattlePage() {
   return (
     <div className="space-y-4">
       <BattleTutorial />
-      {phase === "select" && <PageHero image="/chara/バトル背景.webp" title="出入り" desc="殴り合い。負けりゃ金と体力が落ちる。" />}
+      {phase === "select" && <PageHero image="/chara/バトル背景.webp" title="喧嘩" desc="殴り合い。負けりゃ金と体力が落ちる。" />}
 
       {phase === "select" && (state.worldHp ?? 0) <= 0 && (
         <div className="panel-washi rounded-xl p-5 text-center border border-rose-800/60">

@@ -4,7 +4,7 @@ import { SKILLS, Skill } from "@/lib/game/skills";
 import { TECHNIQUES, findTech } from "@/lib/game/techniques";
 
 const SECTIONS: { kind: Skill["kind"]; title: string; sub: string }[] = [
-  { kind: "technique", title: "◆ 戦闘技", sub: "出入りで使える必殺" },
+  { kind: "technique", title: "◆ 戦闘技", sub: "喧嘩で使える必殺" },
   { kind: "derived", title: "◆ 実力強化", sub: "体力・剛撃・機敏等を底上げ" },
   { kind: "growth", title: "◆ 成長補正", sub: "日々の鍛錬効率UP" },
   { kind: "battle", title: "◆ 戦闘補助", sub: "クリ率等の戦闘バフ" },
@@ -86,7 +86,7 @@ export default function SkillsPage() {
       ))}
 
       <div className="text-[10px] text-slate-500 font-kan leading-relaxed border-t border-slate-800 pt-3">
-        戦闘技は出入り画面で使用可。気力は毎ターン+1回復、ガード時は追加+1。
+        戦闘技は喧嘩画面で使用可。気力は毎ターン+1回復、ガード時は追加+1。
       </div>
     </div>
   );

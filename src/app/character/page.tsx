@@ -71,7 +71,7 @@ export default function CharacterPage() {
       <AchievementsPanel state={state} />
 
       <section className="space-y-2">
-        <h3 className="font-kan tracking-[0.2em] text-rose-300/80 text-sm">◆ 最近の出入り</h3>
+        <h3 className="font-kan tracking-[0.2em] text-rose-300/80 text-sm">◆ 最近の喧嘩</h3>
         <div className="space-y-1.5">
           {state.battles.slice(0, 10).map(b => {
             const e = ENEMIES.find(x => x.id === b.enemyId);
