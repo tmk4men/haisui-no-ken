@@ -1,6 +1,5 @@
 "use client";
 import { useGameState } from "@/hooks/useGameState";
-import { StatsPanel } from "@/components/StatsPanel";
 import { NavCard } from "@/components/NavCard";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { WeeklyChart } from "@/components/WeeklyChart";
@@ -12,8 +11,8 @@ import { NAV_ICONS } from "@/components/icons";
 import { EXP_PER_LEVEL } from "@/lib/game/constants";
 
 export default function HomePage() {
-  const { state, derived, todayStats, revengeActive, buyItem, useWorldItem, openWallet } = useGameState();
-  if (!state || !derived || !todayStats) return <div className="text-slate-400 font-kan">読み込み中…</div>;
+  const { state, todayStats, revengeActive, buyItem, useWorldItem, openWallet } = useGameState();
+  if (!state || !todayStats) return <div className="text-slate-400 font-kan">読み込み中…</div>;
   const c = state.character;
   const expInLevel = c.exp % EXP_PER_LEVEL;
   const expPct = Math.min(100, Math.round((expInLevel / EXP_PER_LEVEL) * 100));
@@ -87,8 +86,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <StatsPanel base={c.base} derived={derived} />
-
         <div className="relative mt-4">
           <MissionsPanel missions={todayStats.missions} />
         </div>
