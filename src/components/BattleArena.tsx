@@ -27,6 +27,8 @@ export function BattleArena({
   const [flash, setFlash] = useState<{ name: string; key: number } | null>(null);
   const [popPlayer, setPopPlayer] = useState<{ amount: number; key: number }>({ amount: 0, key: 0 });
   const [popEnemy, setPopEnemy] = useState<{ amount: number; key: number }>({ amount: 0, key: 0 });
+  const [shakeP, setShakeP] = useState(0);
+  const [shakeE, setShakeE] = useState(0);
   const ownedTechs = useMemo(
     () => TECHNIQUES.filter(t => playerSkills.includes(t.id)),
     [playerSkills]
@@ -52,8 +54,8 @@ export function BattleArena({
     // 攻撃が当たったら打撃音（敵被弾/自被弾それぞれ）
     if (log.playerDamage > 0) SFX.strike();
     if (log.enemyDamage > 0) setTimeout(() => SFX.strike(), 120);
-    if (log.playerDamage > 0) setPopEnemy({ amount: log.playerDamage, key: Date.now() });
-    if (log.enemyDamage > 0) setPopPlayer({ amount: log.enemyDamage, key: Date.now() + 1 });
+    if (log.playerDamage > 0) { setPopEnemy({ amount: log.playerDamage, key: Date.now() }); setShakeE(Date.now()); }
+    if (log.enemyDamage > 0) { setPopPlayer({ amount: log.enemyDamage, key: Date.now() + 1 }); setShakeP(Date.now() + 1); }
     setState(next);
     if (next.over) setTimeout(() => onFinished(next), 900);
     setTechOpen(false);
@@ -84,7 +86,7 @@ export function BattleArena({
       <SpecialMoveFlash techName={flash?.name ?? null} trigger={flash?.key ?? 0} />
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2 relative">
-          <div className="relative">
+          <div key={`pw-${shakeP}`} className={`relative ${shakeP ? "shake-hit" : ""}`}>
             <CharaPortrait />
             <DamagePop amount={popPlayer.amount} crit={false} dodged={false} side="left" trigger={popPlayer.key} />
           </div>
@@ -93,7 +95,7 @@ export function BattleArena({
           <RageGauge value={state.player.rage ?? 0} />
         </div>
         <div className="space-y-2 relative">
-          <div className="relative">
+          <div key={`ew-${shakeE}`} className={`relative ${shakeE ? "shake-hit" : ""}`}>
             <EnemyPortrait enemy={enemy} />
             <DamagePop amount={popEnemy.amount} crit={false} dodged={false} side="right" trigger={popEnemy.key} />
           </div>
@@ -102,6 +104,18 @@ export function BattleArena({
           <RageGauge value={state.enemy.rage ?? 0} />
         </div>
       </div>
+      <style jsx global>{`
+        @keyframes shakeHit {
+          0%   { transform: translate(0,0) rotate(0); }
+          15%  { transform: translate(-6px, 2px) rotate(-1.5deg); }
+          30%  { transform: translate(6px, -2px) rotate(1.5deg); }
+          45%  { transform: translate(-4px, 3px) rotate(-1deg); }
+          60%  { transform: translate(4px, -1px) rotate(1deg); }
+          75%  { transform: translate(-2px, 1px) rotate(-0.5deg); }
+          100% { transform: translate(0,0) rotate(0); }
+        }
+        .shake-hit { animation: shakeHit 420ms ease-out; }
+      `}</style>
 
       {lastLog && (() => {
         const playerFirst = lastLog.notes.some(n => n.startsWith("先手：自"));
