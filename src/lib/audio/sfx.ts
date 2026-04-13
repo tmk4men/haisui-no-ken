@@ -138,12 +138,27 @@ export function playTap() {
   const i = 1 + Math.floor(Math.random() * 3);
   play(`/sfx/tap/tap${i}.mp3`, () => beep(1400, 40, "square", 0.04), 0.55);
 }
+export function playLevelUp() {
+  play("/sfx/levelup/levelup.mp3", () => {
+    beep(523, 120, "square", 0.08);
+    setTimeout(() => beep(784, 120, "square", 0.08), 130);
+    setTimeout(() => beep(1047, 260, "square", 0.08), 260);
+  }, 1);
+}
+export function playAchievement() {
+  play("/sfx/achievement/achievement.mp3", () => {
+    beep(880, 140, "triangle", 0.07);
+    setTimeout(() => beep(1320, 220, "triangle", 0.07), 150);
+  }, 1);
+}
 
 export const SFX = {
   strike: playStrike,
   coin: (v: 1 | 2 | 3 = 1) => playCoin(v),
   click: playClick,
   tap:   playTap,
+  levelUp:     playLevelUp,
+  achievement: playAchievement,
   rep:    () => play("/sfx/punch.mp3",   () => beep(880, 80, "sine", 0.05), 0.8),
   deep:   () => play("/sfx/kick.mp3",    () => beep(1200, 150, "triangle", 0.06), 0.9),
   guard:  () => play("/sfx/guard.mp3",   () => beep(400, 120, "square", 0.06), 0.7),

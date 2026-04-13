@@ -10,6 +10,7 @@ import { evaluateAchievements, ACHIEVEMENTS, Achievement } from "@/lib/game/achi
 import { checkUnlocks } from "@/lib/game/equipment";
 import { ITEMS, WORLD_HP_MAX, WORLD_HP_RECOVER_MS } from "@/lib/game/items";
 import { SKILLS } from "@/lib/game/skills";
+import { SFX } from "@/lib/audio/sfx";
 
 function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -145,6 +146,9 @@ export function useGameState() {
     n = updateEquipmentUnlocks(n);
     const res = evaluateAchievements(n);
     if (res.newly.length) setNewlyAchieved(prev => [...prev, ...res.newly]);
+    if (n.character.level > prevLevel) {
+      try { SFX.levelUp(); } catch {}
+    }
     return res.state;
   }, []);
 
@@ -385,6 +389,24 @@ export function useGameState() {
     setState(prev => prev ? ({ ...prev, character: { ...prev.character, name: trimmed } }) : prev);
   }, []);
 
+  const shareForHp = useCallback((): { ok: boolean; reason?: "already" | "full" } => {
+    if (!state) return { ok: false };
+    const today = todayKey();
+    if (state.lastShareDate === today) return { ok: false, reason: "already" };
+    const max = state.worldHpMax ?? WORLD_HP_MAX;
+    if (state.worldHp >= max) return { ok: false, reason: "full" };
+    setState(prev => {
+      if (!prev) return prev;
+      const m = prev.worldHpMax ?? WORLD_HP_MAX;
+      return {
+        ...prev,
+        worldHp: Math.min(m, prev.worldHp + 1),
+        lastShareDate: today,
+      };
+    });
+    return { ok: true };
+  }, [state]);
+
   const markWeeklyReportShown = useCallback(() => {
     setState(prev => prev ? ({ ...prev, lastWeeklyReportDate: todayKey() }) : prev);
   }, []);
@@ -412,7 +434,7 @@ export function useGameState() {
     state, derived: derivedFull?.derived ?? null, derivedFull, todayStats, revengeActive,
     addSquats, addPushups, addPlank, addStudy, recordBattle,
     learnSkill, equip, updateSettings, renameCharacter, markWeeklyReportShown,
-    buyItem, useWorldItem, openWallet, consumeBattleItem,
+    buyItem, useWorldItem, openWallet, consumeBattleItem, shareForHp,
     reset, replaceState,
     newlyAchieved, ackAchievements,
     achievementList: ACHIEVEMENTS,

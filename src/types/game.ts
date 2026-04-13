@@ -113,4 +113,5 @@ export type GameState = {
   achievements: Record<string, number>; // id → unlockedAt timestamp (0 if locked — absent means locked)
   settings: Settings;
   lastWeeklyReportDate?: string;
+  lastShareDate?: string;
 };

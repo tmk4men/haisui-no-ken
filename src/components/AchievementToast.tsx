@@ -1,11 +1,13 @@
 "use client";
 import { useEffect } from "react";
 import { useGameState } from "@/hooks/useGameState";
+import { SFX } from "@/lib/audio/sfx";
 
 export function AchievementToast() {
   const { newlyAchieved, ackAchievements } = useGameState();
   useEffect(() => {
     if (!newlyAchieved.length) return;
+    SFX.achievement();
     const t = setTimeout(ackAchievements, 4500);
     return () => clearTimeout(t);
   }, [newlyAchieved, ackAchievements]);

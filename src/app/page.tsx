@@ -8,6 +8,7 @@ import { ShopInventory } from "@/components/ShopInventory";
 import { OpeningSplash } from "@/components/OpeningSplash";
 import { HomeTutorial } from "@/components/HomeTutorial";
 import { WorldHpCountdown } from "@/components/WorldHpCountdown";
+import { ShareButton } from "@/components/ShareButton";
 import { NAV_ICONS } from "@/components/icons";
 import { EXP_PER_LEVEL } from "@/lib/game/constants";
 
@@ -76,6 +77,9 @@ export default function HomePage() {
                 <div className="text-[11px] text-rose-200 font-kan leading-snug">体力切れ — 喧嘩不可。湯呑みで全快、お守りで1回復。</div>
               </div>
             )}
+
+            <div className="pt-1"><ShareButton /></div>
+
 
             <div className="flex flex-wrap gap-1.5 pt-2">
               <span className="inline-flex items-center text-[10px] font-kan tracking-wider px-2 py-0.5 rounded-sm border border-amber-600/60 text-amber-200 bg-amber-950/30">
