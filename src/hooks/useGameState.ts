@@ -254,6 +254,12 @@ export function useGameState() {
     setState(prev => prev ? ({ ...prev, settings: { ...prev.settings, ...patch } }) : prev);
   }, []);
 
+  const renameCharacter = useCallback((name: string) => {
+    const trimmed = name.trim().slice(0, 16);
+    if (!trimmed) return;
+    setState(prev => prev ? ({ ...prev, character: { ...prev.character, name: trimmed } }) : prev);
+  }, []);
+
   const markWeeklyReportShown = useCallback(() => {
     setState(prev => prev ? ({ ...prev, lastWeeklyReportDate: todayKey() }) : prev);
   }, []);
@@ -280,7 +286,7 @@ export function useGameState() {
   return {
     state, derived: derivedFull?.derived ?? null, derivedFull, todayStats, revengeActive,
     addSquats, addPushups, addPlank, addStudy, recordBattle,
-    learnSkill, equip, updateSettings, markWeeklyReportShown,
+    learnSkill, equip, updateSettings, renameCharacter, markWeeklyReportShown,
     reset, replaceState,
     newlyAchieved, ackAchievements,
     achievementList: ACHIEVEMENTS,

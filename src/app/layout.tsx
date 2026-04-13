@@ -1,10 +1,15 @@
 import "./globals.css";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Noto_Serif_JP, Yuji_Syuku } from "next/font/google";
+
+const serifKan = Noto_Serif_JP({ subsets: [], weight: ["500", "700", "900"], variable: "--font-kan", display: "swap" });
+const brush = Yuji_Syuku({ subsets: [], weight: "400", variable: "--font-brush", display: "swap" });
 import { PwaRegister } from "@/components/PwaRegister";
 import { AchievementToast } from "@/components/AchievementToast";
 import { WeeklyReportModal } from "@/components/WeeklyReport";
 import { ReminderScheduler } from "@/components/ReminderScheduler";
+import { BikeLoader } from "@/components/BikeLoader";
 import { TITLE, TITLE_SUB, TITLE_MARK, TAGLINE } from "@/lib/ui/labels";
 import { NAV_ICONS } from "@/components/icons";
 
@@ -46,8 +51,9 @@ const NAV = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={`${serifKan.variable} ${brush.variable}`}>
       <body>
+        <BikeLoader />
         <PwaRegister />
         <AchievementToast />
         <WeeklyReportModal />

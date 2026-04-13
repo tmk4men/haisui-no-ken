@@ -9,7 +9,7 @@ export default function StudyPage() {
   const [minutes, setMinutes] = useState(25);
   const [subject, setSubject] = useState<string>("プログラミング");
 
-  if (!state) return <div className="text-slate-400">読み込み中…</div>;
+  if (!state) return <div className="text-slate-400 font-kan">読み込み中…</div>;
 
   const submit = () => {
     addStudy(minutes, subject);
@@ -17,52 +17,50 @@ export default function StudyPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">勉強記録</h2>
-      <div className="rounded-xl bg-slate-900 ring-1 ring-slate-800 p-4 space-y-4">
+    <div className="space-y-5">
+      <h2 className="font-brush text-2xl ink-title blood-stroke">読み込み</h2>
+      <p className="text-[11px] text-slate-400 font-kan tracking-widest">頭を研ぐ。刻んだ分だけ、知略は深まる。</p>
+
+      <div className="panel-washi rounded-xl p-4 space-y-4">
         <div>
-          <label className="block text-sm text-slate-400 mb-1">時間（分）</label>
-          <input
-            type="number"
-            min={1}
-            value={minutes}
+          <label className="block text-[11px] font-kan tracking-widest text-rose-300/70 mb-1.5">時間（分）</label>
+          <input type="number" min={1} value={minutes}
             onChange={e => setMinutes(Number(e.target.value))}
-            className="w-full bg-slate-950 rounded-lg p-3 ring-1 ring-slate-800"
-          />
+            className="w-full bg-black/40 border border-slate-800 rounded-md p-3 font-mono text-lg" />
         </div>
         <div>
-          <label className="block text-sm text-slate-400 mb-1">科目</label>
-          <div className="flex gap-2 flex-wrap">
+          <label className="block text-[11px] font-kan tracking-widest text-rose-300/70 mb-1.5">科目</label>
+          <div className="flex gap-1.5 flex-wrap">
             {SUBJECTS.map(s => (
-              <button
-                key={s}
-                onClick={() => setSubject(s)}
-                className={`px-3 py-1.5 rounded-full text-sm ring-1 ${
-                  subject === s ? "bg-sky-600 ring-sky-500" : "bg-slate-800 ring-slate-700 text-slate-300"
-                }`}
-              >
+              <button key={s} onClick={() => setSubject(s)}
+                className={`px-3 py-1.5 rounded-sm text-xs font-kan tracking-widest border transition ${
+                  subject === s
+                    ? "bg-rose-900/40 border-rose-700 text-rose-100"
+                    : "bg-black/30 border-slate-800 text-slate-300 hover:border-rose-900/60"
+                }`}>
                 {s}
               </button>
             ))}
           </div>
         </div>
-        <button onClick={submit} className="w-full bg-sky-600 hover:bg-sky-500 rounded-xl py-3 font-semibold">
-          記録する（Mind +{(minutes * 0.05).toFixed(1)}）
+        <button onClick={submit}
+          className="slash-on-hover w-full border border-rose-800/60 bg-rose-950/30 hover:bg-rose-900/40 rounded-md py-3 font-kan tracking-[0.3em] text-rose-100">
+          刻む（頭 +{(minutes * 0.05).toFixed(1)}）
         </button>
       </div>
 
-      <div>
-        <h3 className="text-sm font-semibold text-slate-400 mb-2">最近の記録</h3>
-        <div className="space-y-2">
+      <section className="space-y-2">
+        <h3 className="font-kan tracking-[0.2em] text-rose-300/80 text-sm">◆ 最近の記録</h3>
+        <div className="space-y-1.5">
           {state.studies.slice(0, 10).map(s => (
-            <div key={s.id} className="rounded-lg bg-slate-900 ring-1 ring-slate-800 p-3 flex justify-between text-sm">
-              <span>{s.date} / {s.subject ?? "-"}</span>
-              <span className="font-mono text-sky-300">{s.minutes} 分</span>
+            <div key={s.id} className="panel-washi rounded-md p-2.5 flex justify-between items-center text-xs font-kan">
+              <span className="truncate">{s.date} / {s.subject ?? "-"}</span>
+              <span className="font-mono text-sky-300 shrink-0 ml-2">{s.minutes} 分</span>
             </div>
           ))}
-          {state.studies.length === 0 && <div className="text-slate-500 text-sm">まだ記録がありません</div>}
+          {state.studies.length === 0 && <div className="text-slate-500 text-sm font-kan">まだ記録がありません</div>}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

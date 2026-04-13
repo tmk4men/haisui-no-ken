@@ -3,7 +3,7 @@ import { useGameState } from "@/hooks/useGameState";
 
 export default function SettingsPage() {
   const { state, updateSettings } = useGameState();
-  if (!state) return <div className="text-slate-400">読み込み中…</div>;
+  if (!state) return <div className="text-slate-400 font-kan">読み込み中…</div>;
   const s = state.settings;
 
   const togglePermission = async () => {
@@ -17,25 +17,35 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">設定</h2>
-      <div className="rounded-xl bg-slate-900 ring-1 ring-slate-800 p-4 space-y-3">
-        <div className="flex justify-between items-center">
-          <div>
-            <div className="font-semibold">毎日のリマインド</div>
-            <div className="text-xs text-slate-400">指定時刻に通知（ブラウザを開いている間のみ）</div>
+    <div className="space-y-5">
+      <h2 className="font-brush text-2xl ink-title blood-stroke">設定</h2>
+
+      <div className="panel-washi rounded-xl p-4 space-y-4">
+        <div className="flex justify-between items-center gap-3">
+          <div className="min-w-0">
+            <div className="font-brush text-lg text-slate-100">毎日のリマインド</div>
+            <div className="text-[10px] text-slate-400 font-kan mt-0.5 tracking-wide">
+              指定時刻に通知（ブラウザを開いている間のみ）
+            </div>
           </div>
-          <button onClick={togglePermission} className={`rounded-lg px-3 py-1.5 text-sm ${s.reminderEnabled ? "bg-emerald-600" : "bg-slate-700"}`}>
+          <button onClick={togglePermission}
+            className={`rounded-sm px-4 py-1.5 text-xs font-kan tracking-[0.3em] border transition shrink-0 ${
+              s.reminderEnabled
+                ? "bg-emerald-900/40 border-emerald-600/70 text-emerald-200"
+                : "bg-black/40 border-slate-700 text-slate-400"
+            }`}>
             {s.reminderEnabled ? "ON" : "OFF"}
           </button>
         </div>
         <div>
-          <label className="text-xs text-slate-400">時刻</label>
-          <input type="time" value={s.reminderTime} onChange={e => updateSettings({ reminderTime: e.target.value })}
-            className="w-full bg-slate-950 rounded-lg p-2 ring-1 ring-slate-800" />
+          <label className="block text-[11px] font-kan tracking-widest text-rose-300/70 mb-1.5">時刻</label>
+          <input type="time" value={s.reminderTime}
+            onChange={e => updateSettings({ reminderTime: e.target.value })}
+            className="w-full bg-black/40 border border-slate-800 rounded-md p-2.5 font-mono" />
         </div>
       </div>
-      <div className="text-xs text-slate-500">
+
+      <div className="text-[10px] text-slate-500 font-kan leading-relaxed border-t border-slate-800/80 pt-3">
         ホーム画面に追加するとアプリ風に使えます（PWA対応）。
       </div>
     </div>

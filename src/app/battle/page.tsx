@@ -6,6 +6,7 @@ import { BattleState, computeExpReward, flavorResult, initBattle } from "@/lib/g
 import { levelFromExp } from "@/lib/game/stats";
 import { BattleLog } from "@/components/BattleLog";
 import { BattleArena } from "@/components/BattleArena";
+import { BattleTutorial } from "@/components/BattleTutorial";
 import { levelupLine } from "@/lib/ui/labels";
 
 type Fight = { enemy: Enemy; battle: BattleState; exp: number; firstKill: boolean; leveledUp: boolean; newLevel: number } | null;
@@ -50,6 +51,7 @@ export default function BattlePage() {
 
   return (
     <div className="space-y-4">
+      <BattleTutorial />
       <h2 className="font-brush text-2xl ink-title blood-stroke">出入り</h2>
 
       {phase === "select" && (

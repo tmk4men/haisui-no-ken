@@ -43,8 +43,8 @@ export type BattleState = {
 };
 
 export const KI_MAX = 5;
-export const KI_START = 2;
-export const KI_REGEN = 1;
+export const KI_START = 1;
+export const KI_REGEN = 1;  // ガード同士でさらに加算される想定
 
 export function initBattle(playerStats: DerivedStats, enemy: Enemy): BattleState {
   return {
