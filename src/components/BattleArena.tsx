@@ -7,6 +7,7 @@ import { DerivedStats } from "@/types/game";
 import { HpBar } from "./HpBar";
 import { CharaPortrait } from "./CharaPortrait";
 import { SpecialMoveFlash } from "./SpecialMoveFlash";
+import { DamagePop } from "./DamagePop";
 import { SFX } from "@/lib/audio/sfx";
 
 export function BattleArena({
@@ -24,6 +25,8 @@ export function BattleArena({
 }) {
   const [techOpen, setTechOpen] = useState(false);
   const [flash, setFlash] = useState<{ name: string; key: number } | null>(null);
+  const [popPlayer, setPopPlayer] = useState<{ amount: number; key: number }>({ amount: 0, key: 0 });
+  const [popEnemy, setPopEnemy] = useState<{ amount: number; key: number }>({ amount: 0, key: 0 });
   const ownedTechs = useMemo(
     () => TECHNIQUES.filter(t => playerSkills.includes(t.id)),
     [playerSkills]
@@ -46,6 +49,8 @@ export function BattleArena({
       else if (log.playerDamage > 0 || log.enemyDamage > 0) SFX.rep();
     }
     if (log.enemyDamage > 0 && !techName) setTimeout(() => SFX.hit(), 80);
+    if (log.playerDamage > 0) setPopEnemy({ amount: log.playerDamage, key: Date.now() });
+    if (log.enemyDamage > 0) setPopPlayer({ amount: log.enemyDamage, key: Date.now() + 1 });
     setState(next);
     if (next.over) setTimeout(() => onFinished(next), 900);
     setTechOpen(false);
@@ -75,34 +80,52 @@ export function BattleArena({
     <div className="space-y-3">
       <SpecialMoveFlash techName={flash?.name ?? null} trigger={flash?.key ?? 0} />
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <CharaPortrait />
+        <div className="space-y-2 relative">
+          <div className="relative">
+            <CharaPortrait />
+            <DamagePop amount={popPlayer.amount} crit={false} dodged={false} side="left" trigger={popPlayer.key} />
+          </div>
           <HpBar value={state.player.hp} max={state.player.maxHp} color="bg-emerald-500" label="自分" />
           <KiGauge value={state.player.ki} max={state.player.maxKi} />
         </div>
-        <div className="space-y-2">
-          <EnemyPortrait enemy={enemy} />
+        <div className="space-y-2 relative">
+          <div className="relative">
+            <EnemyPortrait enemy={enemy} />
+            <DamagePop amount={popEnemy.amount} crit={false} dodged={false} side="right" trigger={popEnemy.key} />
+          </div>
           <HpBar value={state.enemy.hp} max={state.enemy.maxHp} color="bg-rose-500" label={enemy.name} />
           <KiGauge value={state.enemy.ki} max={state.enemy.maxKi} />
         </div>
       </div>
 
-      {lastLog && (
+      {lastLog && (() => {
+        const playerFirst = lastLog.notes.some(n => n.startsWith("先手：自"));
+        const enemyFirst  = lastLog.notes.some(n => n.startsWith("先手：敵"));
+        return (
         <div className="panel-washi rounded-lg p-3 text-xs font-kan space-y-1">
           <div className="flex justify-between text-slate-400 tracking-widest">
             <span>第 {lastLog.turn} 手</span>
             <span>自→敵 {lastLog.playerDamage} / 敵→自 {lastLog.enemyDamage}</span>
           </div>
-          <div className="flex gap-2 text-slate-200">
-            <span>自：{labelAction(lastLog.playerAction, lastLog.playerTechName)}</span>
+          <div className="flex gap-2 text-slate-200 items-center">
+            <span className="inline-flex items-center gap-1">
+              {playerFirst && <Pill tone="amber">先</Pill>}
+              {enemyFirst && <Pill tone="slate">後</Pill>}
+              自：{labelAction(lastLog.playerAction, lastLog.playerTechName)}
+            </span>
             <span className="text-slate-600">×</span>
-            <span>敵：{labelAction(lastLog.enemyAction, lastLog.enemyTechName)}</span>
+            <span className="inline-flex items-center gap-1">
+              {enemyFirst && <Pill tone="amber">先</Pill>}
+              {playerFirst && <Pill tone="slate">後</Pill>}
+              敵：{labelAction(lastLog.enemyAction, lastLog.enemyTechName)}
+            </span>
           </div>
           {lastLog.notes.length > 0 && (
             <div className="text-[11px] text-rose-300/80">{lastLog.notes.join(" / ")}</div>
           )}
         </div>
-      )}
+        );
+      })()}
 
       {!state.over && (
         <>
@@ -157,6 +180,13 @@ export function BattleArena({
       )}
     </div>
   );
+}
+
+function Pill({ children, tone }: { children: React.ReactNode; tone: "amber" | "slate" }) {
+  const c = tone === "amber"
+    ? "border-amber-500 text-amber-100 bg-amber-900/50"
+    : "border-slate-600 text-slate-300 bg-slate-800/60";
+  return <span className={`inline-block text-[9px] font-kan tracking-wider px-1.5 py-0 rounded-sm border ${c}`}>{children}</span>;
 }
 
 function labelAction(a: Action, techName?: string): string {

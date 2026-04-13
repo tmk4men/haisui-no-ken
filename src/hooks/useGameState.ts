@@ -256,13 +256,13 @@ export function useGameState() {
       const buffs = won ? prev.buffs : [...prev.buffs.filter(b => b.kind !== "revenge"), { kind: "revenge" as const, expiresDate: addDays(todayKey(), 1) }];
 
       let coins = prev.coins;
+      let inventory = prev.inventory;
       let worldHp = prev.worldHp;
       let worldHpLastRecoverAt = prev.worldHpLastRecoverAt;
       if (won && drops) {
         coins += drops.coins ?? 0;
-        if (drops.walletId) {
-          const wallet = ITEMS[drops.walletId];
-          if (wallet?.coinContents) coins += wallet.coinContents;
+        if (drops.walletId && ITEMS[drops.walletId]) {
+          inventory = { ...inventory, [drops.walletId]: (inventory[drops.walletId] ?? 0) + 1 };
         }
       }
       if (!won) {
@@ -274,7 +274,7 @@ export function useGameState() {
         ...prev,
         battles: [record, ...prev.battles],
         character: { ...prev.character, exp: newExp, level: levelFromExp(newExp) },
-        winStreak, buffs, coins, worldHp, worldHpLastRecoverAt,
+        winStreak, buffs, coins, inventory, worldHp, worldHpLastRecoverAt,
       };
       if (won) next = applyMissionProgress(next, "battleWin", 1);
       return finalize(prevLevel)(next);
@@ -318,6 +318,23 @@ export function useGameState() {
       };
     });
     return ok;
+  }, []);
+
+  const openWallet = useCallback((itemId: string): number | null => {
+    const item = ITEMS[itemId];
+    if (!item || item.kind !== "wallet" || !item.coinContents) return null;
+    let gained: number | null = null;
+    setState(prev => {
+      if (!prev) return prev;
+      const cnt = prev.inventory[itemId] ?? 0;
+      if (cnt <= 0) return prev;
+      const variance = 0.8 + Math.random() * 0.4; // 80〜120%
+      gained = Math.max(1, Math.round(item.coinContents! * variance));
+      const inv = { ...prev.inventory, [itemId]: cnt - 1 };
+      if (inv[itemId] <= 0) delete inv[itemId];
+      return { ...prev, inventory: inv, coins: prev.coins + gained! };
+    });
+    return gained;
   }, []);
 
   const consumeBattleItem = useCallback((itemId: string): boolean => {
@@ -384,7 +401,7 @@ export function useGameState() {
     state, derived: derivedFull?.derived ?? null, derivedFull, todayStats, revengeActive,
     addSquats, addPushups, addPlank, addStudy, recordBattle,
     learnSkill, equip, updateSettings, renameCharacter, markWeeklyReportShown,
-    buyItem, useWorldItem, consumeBattleItem,
+    buyItem, useWorldItem, openWallet, consumeBattleItem,
     reset, replaceState,
     newlyAchieved, ackAchievements,
     achievementList: ACHIEVEMENTS,

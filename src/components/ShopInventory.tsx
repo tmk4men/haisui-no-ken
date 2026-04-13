@@ -1,14 +1,23 @@
 "use client";
-import { ITEMS, SHOP_ITEMS } from "@/lib/game/items";
+import { useState } from "react";
+import { ITEMS, SHOP_ITEMS, WALLET_RARITY } from "@/lib/game/items";
 import { GameState } from "@/types/game";
 
+const RARITY_STYLE: Record<string, string> = {
+  common: "border-slate-600 text-slate-200 bg-slate-900/60",
+  rare: "border-sky-500 text-sky-100 bg-sky-950/40 shadow-[0_0_10px_rgba(56,189,248,0.35)]",
+  legend: "border-amber-400 text-amber-100 bg-amber-950/40 shadow-[0_0_14px_rgba(251,191,36,0.55)]",
+};
+
 export function ShopInventory({
-  state, onBuy, onUseWorldItem,
+  state, onBuy, onUseWorldItem, onOpenWallet,
 }: {
   state: GameState;
   onBuy: (id: string) => boolean;
   onUseWorldItem: (id: string) => boolean;
+  onOpenWallet: (id: string) => number | null;
 }) {
+  const [popup, setPopup] = useState<{ name: string; coins: number; rarity: string; key: number } | null>(null);
   const inv = state.inventory ?? {};
   const coins = state.coins ?? 0;
   const entries = Object.entries(inv).filter(([, n]) => n > 0);
@@ -81,10 +90,44 @@ export function ShopInventory({
               {it.kind === "battle-heal" && (
                 <span className="text-[10px] text-slate-500 font-kan">バトル中に使用</span>
               )}
+              {it.kind === "wallet" && (
+                <button
+                  onClick={() => {
+                    const gained = onOpenWallet(id);
+                    if (gained != null) {
+                      setPopup({ name: it.name, coins: gained, rarity: WALLET_RARITY[id] ?? "common", key: Date.now() });
+                    }
+                  }}
+                  className={`shrink-0 font-kan text-xs rounded px-3 py-1.5 border ${RARITY_STYLE[WALLET_RARITY[id] ?? "common"]}`}
+                >
+                  開ける
+                </button>
+              )}
             </div>
           );
         })}
       </div>
+
+      {popup && (
+        <div
+          key={popup.key}
+          onAnimationEnd={() => setPopup(null)}
+          className={`fixed inset-0 z-50 grid place-items-center pointer-events-none`}
+          style={{ animation: "walletPop 1400ms ease-out forwards" }}
+        >
+          <div className={`rounded-xl border-2 px-6 py-4 text-center backdrop-blur ${RARITY_STYLE[popup.rarity]}`}>
+            <div className="font-brush text-2xl mb-1">《{popup.name}》を開けた</div>
+            <div className="font-mono text-3xl font-black">+{popup.coins} コイン</div>
+          </div>
+          <style>{`@keyframes walletPop {
+            0% { opacity: 0; transform: scale(0.85); }
+            15% { opacity: 1; transform: scale(1.05); }
+            25% { transform: scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: scale(1); }
+          }`}</style>
+        </div>
+      )}
     </div>
   );
 }

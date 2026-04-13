@@ -7,11 +7,12 @@ import { WeeklyChart } from "@/components/WeeklyChart";
 import { CharaPortrait } from "@/components/CharaPortrait";
 import { ShopInventory } from "@/components/ShopInventory";
 import { OpeningSplash } from "@/components/OpeningSplash";
+import { WorldHpCountdown } from "@/components/WorldHpCountdown";
 import { NAV_ICONS } from "@/components/icons";
 import { EXP_PER_LEVEL } from "@/lib/game/constants";
 
 export default function HomePage() {
-  const { state, derived, todayStats, revengeActive, buyItem, useWorldItem } = useGameState();
+  const { state, derived, todayStats, revengeActive, buyItem, useWorldItem, openWallet } = useGameState();
   if (!state || !derived || !todayStats) return <div className="text-slate-400 font-kan">読み込み中…</div>;
   const c = state.character;
   const expInLevel = c.exp % EXP_PER_LEVEL;
@@ -55,7 +56,10 @@ export default function HomePage() {
             <div className="pt-2">
               <div className="flex justify-between text-[10px] text-slate-400 font-kan mb-1">
                 <span>体力</span>
-                <span className="font-mono text-rose-300">{worldHp}/{worldHpMax}</span>
+                <span className="flex items-center gap-2">
+                  <WorldHpCountdown lastRecoverAt={state.worldHpLastRecoverAt} full={worldHp >= worldHpMax} />
+                  <span className="font-mono text-rose-300">{worldHp}/{worldHpMax}</span>
+                </span>
               </div>
               <div className="flex gap-1">
                 {Array.from({ length: worldHpMax }).map((_, i) => (
@@ -65,6 +69,12 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
+
+            {worldHp === 0 && (
+              <div className="pt-2 panel-washi rounded-lg p-2 border border-rose-700/60 bg-rose-950/30">
+                <div className="text-[11px] text-rose-200 font-kan leading-snug">体力切れ — 出入り不可。湯呑みで全快、お守りで1回復。</div>
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-1.5 pt-2">
               <span className="inline-flex items-center text-[10px] font-kan tracking-wider px-2 py-0.5 rounded-sm border border-amber-600/60 text-amber-200 bg-amber-950/30">
@@ -98,7 +108,7 @@ export default function HomePage() {
         </div>
 
         <div className="relative mt-5 pt-4 border-t border-slate-800/70">
-          <ShopInventory state={state} onBuy={buyItem} onUseWorldItem={useWorldItem} />
+          <ShopInventory state={state} onBuy={buyItem} onUseWorldItem={useWorldItem} onOpenWallet={openWallet} />
         </div>
       </section>
 

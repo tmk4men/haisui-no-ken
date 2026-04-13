@@ -48,7 +48,7 @@ export const ITEMS: Record<string, Item> = {
     name: "ボロ財布",
     kind: "wallet",
     icon: "財",
-    desc: "中に5コイン。",
+    desc: "中身: 約5コイン。",
     coinContents: 5,
   },
   money_clip: {
@@ -56,7 +56,7 @@ export const ITEMS: Record<string, Item> = {
     name: "マネークリップ",
     kind: "wallet",
     icon: "札",
-    desc: "中に15コイン。",
+    desc: "中身: 約15コイン。",
     coinContents: 15,
   },
   luxury_wallet: {
@@ -64,9 +64,15 @@ export const ITEMS: Record<string, Item> = {
     name: "高級財布",
     kind: "wallet",
     icon: "金",
-    desc: "中に40コイン。",
+    desc: "中身: 約40コイン。",
     coinContents: 40,
   },
+};
+
+export const WALLET_RARITY: Record<string, "common" | "rare" | "legend"> = {
+  boro_wallet: "common",
+  money_clip: "rare",
+  luxury_wallet: "legend",
 };
 
 export const SHOP_ITEMS = ["omamori", "yunomi", "nigiri"];

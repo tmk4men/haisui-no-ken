@@ -147,7 +147,7 @@ export default function BattlePage() {
                 ◎ コイン +{result.drops.coins}
                 {result.drops.walletId && (() => {
                   const w = ITEMS[result.drops!.walletId!];
-                  return w ? <> / 《{w.name}》を拾った（中に{w.coinContents}コイン）</> : null;
+                  return w ? <> / 《{w.name}》を拾った（ホームで開けろ）</> : null;
                 })()}
               </div>
             )}
