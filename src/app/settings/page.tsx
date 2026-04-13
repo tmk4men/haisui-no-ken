@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useGameState } from "@/hooks/useGameState";
 import { getVolume, setVolume, isMuted, setMuted, SFX } from "@/lib/audio/sfx";
 import { getBgmVolume, setBgmVolume, isBgmMuted, setBgmMuted } from "@/lib/audio/bgm";
+import { VolumeSlider } from "@/components/VolumeSlider";
 
 export default function SettingsPage() {
   const { state, updateSettings } = useGameState();
@@ -79,15 +80,10 @@ export default function SettingsPage() {
           </button>
         </div>
         <div>
-          <div className="flex justify-between text-[11px] font-kan text-rose-300/70 tracking-widest mb-1.5">
-            <span>音量</span>
-            <span className="font-mono text-slate-300">{Math.round(vol * 100)}%</span>
-          </div>
-          <input type="range" min={0} max={1} step={0.05}
-            value={vol} onChange={e => changeVol(Number(e.target.value))}
-            className="w-full accent-rose-600" />
+          <div className="text-[11px] font-kan text-rose-300/70 tracking-widest mb-2">音量</div>
+          <VolumeSlider value={vol} onChange={changeVol} accent="rose" />
           <button onClick={testSfx}
-            className="mt-2 text-[10px] font-kan text-slate-400 hover:text-rose-300 underline tracking-widest">
+            className="mt-3 text-xs font-kan text-rose-300 border border-rose-800/60 bg-rose-950/30 hover:bg-rose-900/40 rounded-sm px-3 py-1.5 tracking-widest transition">
             鳴らして確認
           </button>
         </div>
@@ -109,13 +105,8 @@ export default function SettingsPage() {
           </button>
         </div>
         <div>
-          <div className="flex justify-between text-[11px] font-kan text-rose-300/70 tracking-widest mb-1.5">
-            <span>音量</span>
-            <span className="font-mono text-slate-300">{Math.round(bgmVol * 100)}%</span>
-          </div>
-          <input type="range" min={0} max={1} step={0.05}
-            value={bgmVol} onChange={e => changeBgmVol(Number(e.target.value))}
-            className="w-full accent-amber-500" />
+          <div className="text-[11px] font-kan text-rose-300/70 tracking-widest mb-2">音量</div>
+          <VolumeSlider value={bgmVol} onChange={changeBgmVol} accent="amber" />
         </div>
       </div>
 
