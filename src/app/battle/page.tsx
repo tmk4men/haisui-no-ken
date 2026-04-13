@@ -4,6 +4,7 @@ import { useGameState } from "@/hooks/useGameState";
 import { ENEMIES, Enemy, isChapterUnlocked } from "@/lib/game/enemies";
 import { BattleState, computeExpReward, flavorResult, initBattle } from "@/lib/game/battle";
 import { ITEMS, rollEnemyDrop } from "@/lib/game/items";
+import { SFX } from "@/lib/audio/sfx";
 import { levelFromExp } from "@/lib/game/stats";
 import { BattleLog } from "@/components/BattleLog";
 import { BattleArena } from "@/components/BattleArena";
@@ -51,6 +52,7 @@ export default function BattlePage() {
     const newLevel = levelFromExp(state.character.exp + actualExp);
     const drops: Drops | undefined = winner === "player" ? rollEnemyDrop(enemy.expReward) : undefined;
     const coinLost = winner === "enemy" ? Math.floor((state.coins ?? 0) * 0.2) : 0;
+    if (drops && drops.coins > 0) setTimeout(() => SFX.coin(drops.walletId ? 2 : 1), 400);
     recordBattle({ enemyId: enemy.id, result: winner === "player" ? "win" : "lose", expGained: baseExp }, drops);
     setResult({ enemy, battle: finalBattle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel, drops, coinLost });
     setPhase("result");

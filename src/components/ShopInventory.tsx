@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ITEMS, SHOP_ITEMS, WALLET_RARITY, Item } from "@/lib/game/items";
 import { GameState } from "@/types/game";
+import { SFX } from "@/lib/audio/sfx";
 
 function ItemIcon({ item, tone }: { item: Item; tone: "amber" | "sky" }) {
   const border = tone === "amber" ? "border-amber-700/60 bg-amber-950/30 text-amber-200" : "border-sky-700/50 bg-sky-950/30 text-sky-200";
@@ -102,7 +103,10 @@ export function ShopInventory({
                   onClick={() => {
                     const gained = onOpenWallet(id);
                     if (gained != null) {
-                      setPopup({ name: it.name, coins: gained, rarity: WALLET_RARITY[id] ?? "common", key: Date.now() });
+                      const rarity = WALLET_RARITY[id] ?? "common";
+                      const variant: 1 | 2 | 3 = rarity === "legend" ? 3 : rarity === "rare" ? 2 : 1;
+                      SFX.coin(variant);
+                      setPopup({ name: it.name, coins: gained, rarity, key: Date.now() });
                     }
                   }}
                   className={`shrink-0 font-kan text-xs rounded px-3 py-1.5 border ${RARITY_STYLE[WALLET_RARITY[id] ?? "common"]}`}
