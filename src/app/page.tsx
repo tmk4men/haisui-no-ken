@@ -6,6 +6,7 @@ import { WeeklyChart } from "@/components/WeeklyChart";
 import { CharaPortrait } from "@/components/CharaPortrait";
 import { ShopInventory } from "@/components/ShopInventory";
 import { OpeningSplash } from "@/components/OpeningSplash";
+import { HomeTutorial } from "@/components/HomeTutorial";
 import { WorldHpCountdown } from "@/components/WorldHpCountdown";
 import { NAV_ICONS } from "@/components/icons";
 import { EXP_PER_LEVEL } from "@/lib/game/constants";
@@ -21,6 +22,7 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       <OpeningSplash />
+      <HomeTutorial />
       <section className="panel-washi rounded-xl p-5 relative overflow-hidden">
         <div
           aria-hidden
