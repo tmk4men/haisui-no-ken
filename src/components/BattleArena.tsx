@@ -6,6 +6,7 @@ import { Technique, TECHNIQUES } from "@/lib/game/techniques";
 import { DerivedStats, GameState } from "@/types/game";
 import { HpBar } from "./HpBar";
 import { CharaPortrait } from "./CharaPortrait";
+import { SpecialMoveFlash } from "./SpecialMoveFlash";
 import { SFX } from "@/lib/audio/sfx";
 
 export function BattleArena({
@@ -20,6 +21,7 @@ export function BattleArena({
   busy: boolean;
 }) {
   const [techOpen, setTechOpen] = useState(false);
+  const [flash, setFlash] = useState<{ name: string; key: number } | null>(null);
   const ownedTechs = useMemo(
     () => TECHNIQUES.filter(t => playerSkills.includes(t.id)),
     [playerSkills]
@@ -30,7 +32,8 @@ export function BattleArena({
     if (state.over || busy) return;
     const next = resolveTurn(state, action, derived, enemy);
     const log = next.log[next.log.length - 1];
-    if (log.playerTechName || log.enemyTechName) SFX.special();
+    const techName = log.playerTechName || log.enemyTechName;
+    if (techName) { SFX.special(); setFlash({ name: techName, key: Date.now() }); }
     else if (log.playerDamage > 0 || log.enemyDamage > 0) SFX.rep();
     setState(next);
     if (next.over) setTimeout(onFinished, 900);
@@ -39,6 +42,7 @@ export function BattleArena({
 
   return (
     <div className="space-y-3">
+      <SpecialMoveFlash techName={flash?.name ?? null} trigger={flash?.key ?? 0} />
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <CharaPortrait />
