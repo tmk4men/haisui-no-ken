@@ -6,6 +6,7 @@ import { Noto_Serif_JP, Yuji_Syuku } from "next/font/google";
 const serifKan = Noto_Serif_JP({ subsets: [], weight: ["500", "700", "900"], variable: "--font-kan", display: "swap" });
 const brush = Yuji_Syuku({ subsets: [], weight: "400", variable: "--font-brush", display: "swap" });
 import { PwaRegister } from "@/components/PwaRegister";
+import { BgmPlayer } from "@/components/BgmPlayer";
 import { AchievementToast } from "@/components/AchievementToast";
 import { WeeklyReportModal } from "@/components/WeeklyReport";
 import { ReminderScheduler } from "@/components/ReminderScheduler";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja" className={`${serifKan.variable} ${brush.variable}`}>
       <body>
+        <BgmPlayer />
         <PwaRegister />
         <AchievementToast />
         <WeeklyReportModal />

@@ -5,6 +5,7 @@ export type Item = {
   name: string;
   kind: ItemKind;
   icon: string;
+  image?: string;
   desc: string;
   // world-heal: worldHpに回復
   // battle-heal: バトル中HPに回復
@@ -21,6 +22,7 @@ export const ITEMS: Record<string, Item> = {
     name: "お守り",
     kind: "world-heal",
     icon: "符",
+    image: "/items/omamori.webp",
     desc: "体力を1回復する。",
     healAmount: 1,
     price: 15,
@@ -30,6 +32,7 @@ export const ITEMS: Record<string, Item> = {
     name: "湯呑み一杯",
     kind: "world-heal",
     icon: "湯",
+    image: "/items/yunomi.webp",
     desc: "体力を全回復する。",
     healAmount: 99,
     price: 60,
@@ -39,6 +42,7 @@ export const ITEMS: Record<string, Item> = {
     name: "握り飯",
     kind: "battle-heal",
     icon: "飯",
+    image: "/items/nigiri.webp",
     desc: "バトル中、HPを15回復する（1ターン消費）。",
     healAmount: 15,
     price: 25,
@@ -48,6 +52,7 @@ export const ITEMS: Record<string, Item> = {
     name: "ボロ財布",
     kind: "wallet",
     icon: "財",
+    image: "/items/boro_wallet.webp",
     desc: "中身: 約5コイン。",
     coinContents: 5,
   },
@@ -56,6 +61,7 @@ export const ITEMS: Record<string, Item> = {
     name: "マネークリップ",
     kind: "wallet",
     icon: "札",
+    image: "/items/money_clip.webp",
     desc: "中身: 約15コイン。",
     coinContents: 15,
   },
@@ -64,6 +70,7 @@ export const ITEMS: Record<string, Item> = {
     name: "高級財布",
     kind: "wallet",
     icon: "金",
+    image: "/items/luxury_wallet.webp",
     desc: "中身: 約40コイン。",
     coinContents: 40,
   },

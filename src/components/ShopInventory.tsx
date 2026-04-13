@@ -1,7 +1,16 @@
 "use client";
 import { useState } from "react";
-import { ITEMS, SHOP_ITEMS, WALLET_RARITY } from "@/lib/game/items";
+import { ITEMS, SHOP_ITEMS, WALLET_RARITY, Item } from "@/lib/game/items";
 import { GameState } from "@/types/game";
+
+function ItemIcon({ item, tone }: { item: Item; tone: "amber" | "sky" }) {
+  const border = tone === "amber" ? "border-amber-700/60 bg-amber-950/30 text-amber-200" : "border-sky-700/50 bg-sky-950/30 text-sky-200";
+  if (item.image) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={item.image} alt={item.name} className={`w-10 h-10 shrink-0 rounded border ${border} object-contain bg-black/30`} />;
+  }
+  return <div className={`w-10 h-10 shrink-0 rounded border grid place-items-center font-brush ${border}`}>{item.icon}</div>;
+}
 
 const RARITY_STYLE: Record<string, string> = {
   common: "border-slate-600 text-slate-200 bg-slate-900/60",
@@ -36,9 +45,8 @@ export function ShopInventory({
           return (
             <div key={id} className="panel-washi rounded-lg p-3 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-9 h-9 shrink-0 rounded border border-amber-700/60 bg-amber-950/30 grid place-items-center font-brush text-amber-200">
-                  {it.icon}
-                </div>
+                <ItemIcon item={it} tone="amber" />
+
                 <div className="min-w-0">
                   <div className="font-kan text-sm text-slate-100">{it.name}</div>
                   <div className="text-[10px] text-slate-400 font-kan truncate">{it.desc}</div>
@@ -68,9 +76,8 @@ export function ShopInventory({
           return (
             <div key={id} className="panel-washi rounded-lg p-3 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-9 h-9 shrink-0 rounded border border-sky-700/50 bg-sky-950/30 grid place-items-center font-brush text-sky-200">
-                  {it.icon}
-                </div>
+                <ItemIcon item={it} tone="sky" />
+
                 <div className="min-w-0">
                   <div className="font-kan text-sm text-slate-100">{it.name} <span className="text-xs text-slate-500">×{n}</span></div>
                   <div className="text-[10px] text-slate-400 font-kan truncate">{it.desc}</div>
