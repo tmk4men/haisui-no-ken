@@ -30,7 +30,7 @@ export default function HomePage() {
         <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30 pointer-events-none" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
         <div className="absolute -top-6 -right-4 text-[160px] leading-none font-brush text-rose-950/40 select-none pointer-events-none">漢</div>
-        <div className="grid grid-cols-[116px_1fr] gap-4 items-stretch mb-4 relative">
+        <div className="grid grid-cols-[116px_1fr] gap-4 items-start mb-4 relative">
           <CharaPortrait />
           <div className="flex flex-col gap-1.5 justify-between">
             <div className="flex items-center gap-2">
