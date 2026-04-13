@@ -34,7 +34,8 @@ export default function SquatPage() {
       setDisplay(d => ({ ...d, lastQuality: q }));
       setFlash(Date.now());
       setIssues(detectorRef.current.lastIssues);
-      q === "deep" ? SFX.deep() : SFX.rep();
+      SFX.click();
+      if (q === "deep") setTimeout(() => SFX.click(), 90);
     }
     setDisplay(d => ({ ...d, angle: res.displayMetric, phase: res.phase }));
   });
