@@ -37,16 +37,16 @@ export default function BattlePage() {
     setPhase("arena");
   };
 
-  const onFinished = () => {
-    if (!enemy || !battle) return;
-    const winner: "player" | "enemy" = battle.over ?? "enemy";
+  const onFinished = (finalBattle: BattleState) => {
+    if (!enemy) return;
+    const winner: "player" | "enemy" = finalBattle.over ?? "enemy";
     const firstKill = winner === "player" && !killedIds.has(enemy.id);
     const baseExp = computeExpReward({ baseReward: enemy.expReward, winner, winStreak: state.winStreak, firstKill });
     const actualExp = Math.round(baseExp * derivedFull.expMult);
     const prevLevel = state.character.level;
     const newLevel = levelFromExp(state.character.exp + actualExp);
     recordBattle({ enemyId: enemy.id, result: winner === "player" ? "win" : "lose", expGained: baseExp });
-    setResult({ enemy, battle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel });
+    setResult({ enemy, battle: finalBattle, exp: actualExp, firstKill, leveledUp: newLevel > prevLevel, newLevel });
     setPhase("result");
   };
 

@@ -17,7 +17,7 @@ export function BattleArena({
   derived: DerivedStats;
   enemy: Enemy;
   playerSkills: string[];
-  onFinished: () => void;
+  onFinished: (finalState: BattleState) => void;
   busy: boolean;
 }) {
   const [techOpen, setTechOpen] = useState(false);
@@ -45,7 +45,7 @@ export function BattleArena({
     }
     if (log.enemyDamage > 0 && !techName) setTimeout(() => SFX.hit(), 80);
     setState(next);
-    if (next.over) setTimeout(onFinished, 900);
+    if (next.over) setTimeout(() => onFinished(next), 900);
     setTechOpen(false);
   };
 
