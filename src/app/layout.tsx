@@ -34,13 +34,13 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
-  { href: "/train", label: "シバキ", icon: "🏋" },
-  { href: "/study", label: "読込", icon: "📚" },
-  { href: "/battle", label: "出入", icon: "⚔" },
+  { href: "/train", label: "シバキ", icon: "拳" },
+  { href: "/study", label: "読込", icon: "書" },
+  { href: "/battle", label: "出入", icon: "刃" },
   { href: "/character", label: "漢", icon: "人" },
-  { href: "/skills", label: "技", icon: "✦" },
-  { href: "/equipment", label: "装具", icon: "🎽" },
-  { href: "/settings", label: "設定", icon: "⚙" },
+  { href: "/skills", label: "技", icon: "技" },
+  { href: "/equipment", label: "装具", icon: "具" },
+  { href: "/settings", label: "設定", icon: "卍" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

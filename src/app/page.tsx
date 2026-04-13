@@ -47,10 +47,10 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-1.5 pt-2">
-              {c.skillPoints > 0 && <Badge tone="gold">✦ 技{c.skillPoints}</Badge>}
-              <Badge tone="amber">🔥 {state.streak}日連続</Badge>
-              {state.winStreak > 0 && <Badge tone="emerald">⚔ {state.winStreak}連勝</Badge>}
-              {revengeActive && <Badge tone="rose">💢 覚えてろよ +20%</Badge>}
+              {c.skillPoints > 0 && <Badge tone="gold">◈ 技{c.skillPoints}</Badge>}
+              <Badge tone="amber">炎 {state.streak}日連続</Badge>
+              {state.winStreak > 0 && <Badge tone="emerald">勝 {state.winStreak}連勝</Badge>}
+              {revengeActive && <Badge tone="rose">怒 覚えてろよ +20%</Badge>}
             </div>
           </div>
         </div>
@@ -72,11 +72,11 @@ export default function HomePage() {
       <WeeklyChart state={state} />
 
       <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <NavCard href="/train" title="シバキ上げ" desc="スクワ/腕立/プランク" icon="🏋" />
-        <NavCard href="/study" title="読み込み" desc="頭を研ぐ" icon="📚" />
-        <NavCard href="/battle" title="出入り" desc="殴り合い" icon="⚔" />
-        <NavCard href="/skills" title="技の覚書" desc="スキル習得" icon="✦" />
-        <NavCard href="/equipment" title="装具" desc="手に入れた装備" icon="🎽" />
+        <NavCard href="/train" title="シバキ上げ" desc="スクワ/腕立/プランク" icon="拳" />
+        <NavCard href="/study" title="読み込み" desc="頭を研ぐ" icon="書" />
+        <NavCard href="/battle" title="出入り" desc="殴り合い" icon="刃" />
+        <NavCard href="/skills" title="技の覚書" desc="スキル習得" icon="技" />
+        <NavCard href="/equipment" title="装具" desc="手に入れた装備" icon="具" />
         <NavCard href="/character" title="漢" desc="詳細/実績/データ" icon="人" />
       </section>
     </div>

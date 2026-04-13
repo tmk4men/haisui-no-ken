@@ -49,7 +49,7 @@ export default function PlankPage() {
       <p className="text-xs text-slate-400 font-kan">肩→腰→足首が一直線なら保持中としてカウント。</p>
 
       <div className="relative rounded-xl overflow-hidden bg-black aspect-video ring-1 ring-slate-800">
-        <video ref={videoRef} className="w-full h-full object-contain" playsInline muted />
+        <video ref={videoRef} className="w-full h-full object-contain scale-x-[-1]" playsInline muted />
         {!cameraOn && (
           <button onClick={enableCamera} disabled={!ready}
             className="absolute inset-0 grid place-items-center bg-black/60 text-lg font-semibold disabled:opacity-50">

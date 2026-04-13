@@ -68,7 +68,7 @@ export default function SquatPage() {
       <p className="text-xs text-slate-400 font-kan">90°以下=有効、75°以下=Deep(+50%)、速すぎ=Fast(-40%)、浅い=Shallow(-70%)</p>
 
       <div className="relative rounded-xl overflow-hidden bg-black aspect-video ring-1 ring-slate-800">
-        <video ref={videoRef} className="w-full h-full object-contain" playsInline muted />
+        <video ref={videoRef} className="w-full h-full object-contain scale-x-[-1]" playsInline muted />
         {!cameraOn && (
           <button onClick={enableCamera} disabled={!ready}
             className="absolute inset-0 grid place-items-center bg-black/60 text-lg font-semibold disabled:opacity-50">

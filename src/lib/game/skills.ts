@@ -1,10 +1,11 @@
 import { DerivedStats } from "@/types/game";
+import { TECHNIQUES } from "./techniques";
 
 export type Skill = {
   id: string;
   name: string;
   desc: string;
-  kind: "growth" | "derived" | "battle";
+  kind: "growth" | "derived" | "battle" | "technique";
   apply: (ctx: { derived?: DerivedStats; bodyMult?: number; mindMult?: number; expMult?: number; critBonus?: number }) => void;
 };
 
@@ -23,6 +24,14 @@ export const SKILLS: Skill[] = [
     apply: (c) => { c.bodyMult = (c.bodyMult ?? 1) * 1.2; } },
   { id: "hunter", name: "目利き", desc: "獲得EXP+15%", kind: "growth",
     apply: (c) => { c.expMult = (c.expMult ?? 1) * 1.15; } },
+  // --- 戦闘技（バトル中に使用、気力消費） ---
+  ...TECHNIQUES.map<Skill>(t => ({
+    id: t.id,
+    name: t.name,
+    desc: `戦闘技・気力${t.cost}：${t.flavor}`,
+    kind: "technique" as const,
+    apply: () => {},
+  })),
 ];
 
 export function applySkills(skillIds: string[], ctx: Parameters<Skill["apply"]>[0]) {

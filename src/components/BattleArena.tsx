@@ -1,70 +1,159 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { BattleResult, TurnEvent } from "@/lib/game/battle";
+import { useMemo, useState } from "react";
+import { BattleState, PlayerAction, Action, resolveTurn, canUseTech } from "@/lib/game/battle";
 import { Enemy } from "@/lib/game/enemies";
+import { Technique, TECHNIQUES } from "@/lib/game/techniques";
+import { DerivedStats, GameState } from "@/types/game";
 import { HpBar } from "./HpBar";
 import { CharaPortrait } from "./CharaPortrait";
-import { DamagePop } from "./DamagePop";
-import { SpecialMoveFlash } from "./SpecialMoveFlash";
 import { SFX } from "@/lib/audio/sfx";
 
-export function BattleArena({ result, playerHp, enemy, onFinished }: {
-  result: BattleResult;
-  playerHp: number;
+export function BattleArena({
+  state, setState, derived, enemy, playerSkills, onFinished, busy,
+}: {
+  state: BattleState;
+  setState: (s: BattleState) => void;
+  derived: DerivedStats;
   enemy: Enemy;
+  playerSkills: string[];
   onFinished: () => void;
+  busy: boolean;
 }) {
-  const [index, setIndex] = useState(0);
-  const [pHp, setPHp] = useState(playerHp);
-  const [eHp, setEHp] = useState(enemy.stats.hp);
-  const [pop, setPop] = useState<{ amount: number; crit: boolean; dodged: boolean; side: "left" | "right"; trigger: number } | null>(null);
-  const [flash, setFlash] = useState<{ tech: string; key: number } | null>(null);
-  const finishedRef = useRef(false);
+  const [techOpen, setTechOpen] = useState(false);
+  const ownedTechs = useMemo(
+    () => TECHNIQUES.filter(t => playerSkills.includes(t.id)),
+    [playerSkills]
+  );
+  const lastLog = state.log[state.log.length - 1];
 
-  useEffect(() => {
-    if (index >= result.turns.length) {
-      if (!finishedRef.current) {
-        finishedRef.current = true;
-        result.winner === "player" ? SFX.victory() : SFX.defeat();
-        setTimeout(onFinished, 600);
-      }
-      return;
-    }
-    const t: TurnEvent = result.turns[index];
-    const delay = 700;
-    const h = setTimeout(() => {
-      if (t.dodged) {
-        setPop({ amount: 0, crit: false, dodged: true, side: t.actor === "player" ? "right" : "left", trigger: Date.now() });
-      } else {
-        if (t.actor === "player") setEHp(t.hpLeft.enemy);
-        else setPHp(t.hpLeft.player);
-        if (t.crit && t.techniqueName) { setFlash({ tech: t.techniqueName, key: Date.now() }); SFX.special(); }
-        setPop({ amount: t.damage, crit: t.crit, dodged: false, side: t.actor === "player" ? "right" : "left", trigger: Date.now() });
-      }
-      setIndex(i => i + 1);
-    }, delay);
-    return () => clearTimeout(h);
-  }, [index, result, onFinished]);
+  const act = (action: PlayerAction) => {
+    if (state.over || busy) return;
+    const next = resolveTurn(state, action, derived, enemy);
+    const log = next.log[next.log.length - 1];
+    if (log.playerTechName || log.enemyTechName) SFX.special();
+    else if (log.playerDamage > 0 || log.enemyDamage > 0) SFX.rep();
+    setState(next);
+    if (next.over) setTimeout(onFinished, 900);
+    setTechOpen(false);
+  };
 
   return (
     <div className="space-y-3">
-      <SpecialMoveFlash techName={flash?.tech ?? null} trigger={flash?.key ?? 0} />
-      <div className="relative rounded-xl bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-800 p-4 min-h-[320px]">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <CharaPortrait />
-            <div className="mt-2">
-              <HpBar value={pHp} max={playerHp} color="bg-emerald-500" label="自分" />
-            </div>
-          </div>
-          <div>
-            <EnemyPortrait enemy={enemy} />
-            <div className="mt-2">
-              <HpBar value={eHp} max={enemy.stats.hp} color="bg-rose-500" label={enemy.name} />
-            </div>
-          </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <CharaPortrait />
+          <HpBar value={state.player.hp} max={state.player.maxHp} color="bg-emerald-500" label="自分" />
+          <KiGauge value={state.player.ki} max={state.player.maxKi} />
         </div>
-        {pop && <DamagePop {...pop} />}
+        <div className="space-y-2">
+          <EnemyPortrait enemy={enemy} />
+          <HpBar value={state.enemy.hp} max={state.enemy.maxHp} color="bg-rose-500" label={enemy.name} />
+          <KiGauge value={state.enemy.ki} max={state.enemy.maxKi} />
+        </div>
+      </div>
+
+      {lastLog && (
+        <div className="panel-washi rounded-lg p-3 text-xs font-kan space-y-1">
+          <div className="flex justify-between text-slate-400 tracking-widest">
+            <span>第 {lastLog.turn} 手</span>
+            <span>自→敵 {lastLog.playerDamage} / 敵→自 {lastLog.enemyDamage}</span>
+          </div>
+          <div className="flex gap-2 text-slate-200">
+            <span>自：{labelAction(lastLog.playerAction, lastLog.playerTechName)}</span>
+            <span className="text-slate-600">×</span>
+            <span>敵：{labelAction(lastLog.enemyAction, lastLog.enemyTechName)}</span>
+          </div>
+          {lastLog.notes.length > 0 && (
+            <div className="text-[11px] text-rose-300/80">{lastLog.notes.join(" / ")}</div>
+          )}
+        </div>
+      )}
+
+      {!state.over && (
+        <div className="grid grid-cols-4 gap-2">
+          <CmdBtn label="拳" sub="速い" icon="拳" onClick={() => act({ type: "punch" })} disabled={busy} />
+          <CmdBtn label="蹴り" sub="重い/技潰し" icon="脚" onClick={() => act({ type: "kick" })} disabled={busy} />
+          <CmdBtn label="ガード" sub="被ダメ減" icon="盾" onClick={() => act({ type: "guard" })} disabled={busy} />
+          <CmdBtn label="技" sub={`${ownedTechs.length}種`} icon="技" onClick={() => setTechOpen(v => !v)}
+                  disabled={busy || ownedTechs.length === 0} active={techOpen} />
+        </div>
+      )}
+
+      {techOpen && !state.over && (
+        <div className="panel-washi rounded-lg p-3 space-y-1.5">
+          {ownedTechs.length === 0 && (
+            <div className="text-xs text-slate-400 font-kan">習得した技がない。技の覚書で購入せよ。</div>
+          )}
+          {ownedTechs.map(t => {
+            const usable = canUseTech(state.player.ki, t);
+            return (
+              <button
+                key={t.id}
+                onClick={() => usable && act({ type: "tech", techId: t.id })}
+                disabled={!usable || busy}
+                className={`w-full text-left rounded-md p-2 border flex justify-between items-center transition ${
+                  usable ? "border-rose-800/60 bg-rose-950/20 hover:bg-rose-900/30" : "border-slate-800 bg-black/30 opacity-50"
+                }`}
+              >
+                <div>
+                  <div className="font-kan font-bold text-slate-100">{t.name}</div>
+                  <div className="text-[10px] text-slate-400 font-kan">{t.flavor}</div>
+                </div>
+                <div className="text-xs font-mono text-amber-300 shrink-0 ml-2">気力 {t.cost}</div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function labelAction(a: Action, techName?: string): string {
+  if (a === "punch") return "拳";
+  if (a === "kick") return "蹴り";
+  if (a === "guard") return "ガード";
+  return `技《${techName ?? "—"}》`;
+}
+
+function CmdBtn({ label, sub, icon, onClick, disabled, active }: {
+  label: string; sub: string; icon: string; onClick: () => void; disabled?: boolean; active?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`slash-on-hover rounded-lg py-2.5 px-1 border text-center transition ${
+        active
+          ? "border-rose-500 bg-rose-900/40"
+          : disabled
+          ? "border-slate-800 bg-black/40 opacity-40"
+          : "border-slate-700 bg-slate-900 hover:bg-rose-950/40 hover:border-rose-800"
+      }`}
+    >
+      <div className="font-brush text-xl text-rose-200">{icon}</div>
+      <div className="font-kan text-xs text-slate-200 mt-0.5">{label}</div>
+      <div className="text-[9px] text-slate-500 font-kan">{sub}</div>
+    </button>
+  );
+}
+
+function KiGauge({ value, max }: { value: number; max: number }) {
+  return (
+    <div>
+      <div className="flex justify-between text-[10px] text-slate-400 font-kan mb-0.5">
+        <span>気力</span>
+        <span className="font-mono">{value}/{max}</span>
+      </div>
+      <div className="flex gap-0.5">
+        {Array.from({ length: max }).map((_, i) => (
+          <div
+            key={i}
+            className={`flex-1 h-1.5 rounded-sm ${
+              i < value ? "bg-gradient-to-r from-amber-400 to-rose-500 shadow-[0_0_6px_rgba(251,191,36,0.5)]" : "bg-slate-800"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );
@@ -77,24 +166,20 @@ function EnemyPortrait({ enemy }: { enemy: Enemy }) {
       {failed ? (
         <div className="absolute inset-0 grid place-items-center">
           <div className="text-center">
-            <div className="text-4xl mb-2">👹</div>
-            <div className="font-kan font-bold">{enemy.name}</div>
+            <div className="font-brush text-5xl text-rose-300">敵</div>
+            <div className="font-kan font-bold mt-2">{enemy.name}</div>
           </div>
         </div>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={`/chara/enemy_${enemy.id}.png`}
-          alt={enemy.name}
-          className="w-full h-full object-cover"
-          onError={() => setFailed(true)}
-        />
+        <img src={`/chara/enemy_${enemy.id}.png`} alt={enemy.name}
+             className="w-full h-full object-cover" onError={() => setFailed(true)} />
       )}
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-2 text-center">
         <div className="font-kan font-bold tracking-wider text-slate-100 drop-shadow">{enemy.name}</div>
         <div className="text-[10px] text-rose-300/80 mt-0.5 font-kan tracking-widest">
-          {enemy.element === "magic" ? "読み型" : "拳型"}
+          {enemy.element === "magic" ? "読み型" : "拳型"} / AI:{enemy.ai}
         </div>
       </div>
     </div>
