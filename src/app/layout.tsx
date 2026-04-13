@@ -6,6 +6,7 @@ import { AchievementToast } from "@/components/AchievementToast";
 import { WeeklyReportModal } from "@/components/WeeklyReport";
 import { ReminderScheduler } from "@/components/ReminderScheduler";
 import { TITLE, TITLE_SUB, TITLE_MARK, TAGLINE } from "@/lib/ui/labels";
+import { NAV_ICONS } from "@/components/icons";
 
 const SITE_URL = "https://haisui-no-ken.vercel.app";
 const OG_TITLE = `${TITLE} -${TITLE_SUB}-`;
@@ -34,13 +35,13 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
-  { href: "/train", label: "シバキ", icon: "拳" },
-  { href: "/study", label: "読込", icon: "書" },
-  { href: "/battle", label: "出入", icon: "刃" },
-  { href: "/character", label: "漢", icon: "人" },
-  { href: "/skills", label: "技", icon: "技" },
-  { href: "/equipment", label: "装具", icon: "具" },
-  { href: "/settings", label: "設定", icon: "卍" },
+  { href: "/train", label: "シバキ", Icon: NAV_ICONS.train },
+  { href: "/study", label: "読込", Icon: NAV_ICONS.study },
+  { href: "/battle", label: "出入", Icon: NAV_ICONS.battle },
+  { href: "/character", label: "漢", Icon: NAV_ICONS.character },
+  { href: "/skills", label: "技", Icon: NAV_ICONS.skills },
+  { href: "/equipment", label: "装具", Icon: NAV_ICONS.equipment },
+  { href: "/settings", label: "設定", Icon: NAV_ICONS.settings },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -76,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   href={n.href}
                   className="font-kan shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-slate-800 text-slate-300 hover:text-rose-200 hover:border-rose-900/60 hover:bg-rose-950/20 transition"
                 >
-                  <span className="text-slate-500">{n.icon}</span>
+                  <n.Icon size={14} className="text-rose-300/70 group-hover:text-rose-200" />
                   <span>{n.label}</span>
                 </Link>
               ))}
