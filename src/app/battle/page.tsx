@@ -23,6 +23,11 @@ export default function BattlePage() {
     return new Set(state.battles.filter(b => b.result === "win").map(b => b.enemyId));
   }, [state]);
 
+  const lostIds = useMemo(() => {
+    if (!state) return new Set<string>();
+    return new Set(state.battles.filter(b => b.result === "lose").map(b => b.enemyId));
+  }, [state]);
+
   if (!state || !derived || !derivedFull) return <div className="text-slate-400 font-kan">読み込み中…</div>;
 
   const startFight = (e: Enemy) => {
@@ -60,14 +65,23 @@ export default function BattlePage() {
             <div className="text-xs text-emerald-300 font-kan">勝 {state.winStreak}連勝中（EXP x{Math.min(1.5, 1 + state.winStreak * 0.1).toFixed(1)}）</div>
           )}
           <div className="grid gap-3">
-            {ENEMIES.map(e => (
+            {ENEMIES.map(e => {
+              const killed = killedIds.has(e.id);
+              const lost = lostIds.has(e.id) && !killed;
+              return (
               <button key={e.id} onClick={() => startFight(e)}
-                className="slash-on-hover text-left rounded-xl panel-washi p-4 hover:border-rose-800/60 transition">
-                <div className="flex justify-between">
+                className={`slash-on-hover text-left relative rounded-xl panel-washi p-4 hover:border-rose-800/60 transition ${killed ? "opacity-80" : ""}`}>
+                {killed && (
+                  <span className="absolute top-2 right-2 stamp-cleared">撃破</span>
+                )}
+                {lost && (
+                  <span className="absolute top-2 right-2 stamp-cleared" style={{ color: "#94a3b8", borderColor: "#475569", background: "rgba(15,23,42,0.5)" }}>敗北</span>
+                )}
+                <div className="flex justify-between pr-14">
                   <div>
                     <div className="text-xs text-slate-500 font-kan tracking-widest">{e.chapter}</div>
                     <div className="font-kan font-bold tracking-wider text-slate-100">
-                      {e.name} {!killedIds.has(e.id) && <span className="text-xs text-amber-300 ml-1">初討伐 x1.5</span>}
+                      {e.name} {!killed && <span className="text-xs text-amber-300 ml-1">初討伐 x1.5</span>}
                     </div>
                     <div className="text-xs text-slate-400 italic mt-1 font-kan">「{e.taunt}」</div>
                   </div>
@@ -79,7 +93,8 @@ export default function BattlePage() {
                   体{e.stats.hp} 剛{e.stats.attack} 受{e.stats.defense} 知{e.stats.magic} 速{e.stats.speed} — EXP{e.expReward}
                 </div>
               </button>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
