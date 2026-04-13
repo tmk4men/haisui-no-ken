@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const KEY = "kandou:battleTutorialSeen";
+const KEY = "kandou:battleTutorialSeenV2";
 
 export function BattleTutorial() {
   const [open, setOpen] = useState(false);
@@ -24,8 +24,9 @@ export function BattleTutorial() {
           <li><b className="text-rose-300">ガード</b>：被ダメ大幅減＋気力＋1。技には貫かれやすい。</li>
           <li><b className="text-rose-300">技</b>：<b className="text-amber-300">気力</b>を消費。技の覚書で習得。</li>
         </ul>
-        <div className="text-[11px] text-slate-400 font-kan border-t border-slate-800/70 pt-3 leading-relaxed">
-          相性：蹴り&gt;技&gt;ガード&gt;拳・蹴り。気力は毎ターン＋1、ガードで＋2。読み合って、刻め。
+        <div className="text-[11px] text-slate-400 font-kan border-t border-slate-800/70 pt-3 leading-relaxed space-y-1">
+          <div>先手後手は<b className="text-rose-300">眼力(知力)</b>で決まる。先手で沈めれば反撃なし。</div>
+          <div>相性：蹴り&gt;技&gt;ガード&gt;拳・蹴り。気力は毎ターン＋1、ガードで＋2。</div>
         </div>
         <button onClick={close}
           className="slash-on-hover w-full border border-rose-800/70 bg-rose-950/40 hover:bg-rose-900/40 rounded-md py-3 font-brush text-xl ink-title tracking-widest">
