@@ -18,7 +18,7 @@ export const MISSION_LABEL = {
   squat: "シバキ上げ（スクワット）",
   pushup: "押し込み（腕立て）",
   plank: "我慢（プランク・秒）",
-  study: "読み込み（勉強・分）",
+  study: "勉学（勉強・分）",
   battleWin: "殴り合いに勝つ",
 } as const;
 

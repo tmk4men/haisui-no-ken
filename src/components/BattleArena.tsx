@@ -29,6 +29,9 @@ export function BattleArena({
   const [popEnemy, setPopEnemy] = useState<{ amount: number; key: number }>({ amount: 0, key: 0 });
   const [shakeP, setShakeP] = useState(0);
   const [shakeE, setShakeE] = useState(0);
+  const [impact, setImpact] = useState<{ key: number; side: "left" | "right"; crit: boolean; color: string } | null>(null);
+  const [popPlayerMeta, setPopPlayerMeta] = useState<{ crit: boolean; dodged: boolean }>({ crit: false, dodged: false });
+  const [popEnemyMeta, setPopEnemyMeta] = useState<{ crit: boolean; dodged: boolean }>({ crit: false, dodged: false });
   const ownedTechs = useMemo(
     () => TECHNIQUES.filter(t => playerSkills.includes(t.id)),
     [playerSkills]
@@ -54,8 +57,26 @@ export function BattleArena({
     // 攻撃が当たったら打撃音（敵被弾/自被弾それぞれ）
     if (log.playerDamage > 0) SFX.strike();
     if (log.enemyDamage > 0) setTimeout(() => SFX.strike(), 120);
-    if (log.playerDamage > 0) { setPopEnemy({ amount: log.playerDamage, key: Date.now() }); setShakeE(Date.now()); }
-    if (log.enemyDamage > 0) { setPopPlayer({ amount: log.enemyDamage, key: Date.now() + 1 }); setShakeP(Date.now() + 1); }
+    const pCrit = !!log.playerTechName || log.playerDamage >= 20;
+    const eCrit = !!log.enemyTechName || log.enemyDamage >= 20;
+    if (log.playerDamage > 0) {
+      setPopEnemy({ amount: log.playerDamage, key: Date.now() });
+      setPopEnemyMeta({ crit: pCrit, dodged: false });
+      setShakeE(Date.now());
+      setImpact({ key: Date.now(), side: "right", crit: pCrit, color: pCrit ? "#fbbf24" : "#f43f5e" });
+    } else if (log.enemyDodged) {
+      setPopEnemy({ amount: 0, key: Date.now() });
+      setPopEnemyMeta({ crit: false, dodged: true });
+    }
+    if (log.enemyDamage > 0) {
+      setPopPlayer({ amount: log.enemyDamage, key: Date.now() + 1 });
+      setPopPlayerMeta({ crit: eCrit, dodged: false });
+      setShakeP(Date.now() + 1);
+      setImpact({ key: Date.now() + 1, side: "left", crit: eCrit, color: eCrit ? "#fbbf24" : "#f43f5e" });
+    } else if (log.playerDodged) {
+      setPopPlayer({ amount: 0, key: Date.now() + 1 });
+      setPopPlayerMeta({ crit: false, dodged: true });
+    }
     setState(next);
     if (next.over) setTimeout(() => onFinished(next), 900);
     setTechOpen(false);
@@ -84,11 +105,13 @@ export function BattleArena({
   return (
     <div className="space-y-3">
       <SpecialMoveFlash techName={flash?.name ?? null} trigger={flash?.key ?? 0} />
+      <ImpactFlash data={impact} />
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2 relative">
           <div key={`pw-${shakeP}`} className={`relative ${shakeP ? "shake-hit" : ""}`}>
             <CharaPortrait />
-            <DamagePop amount={popPlayer.amount} crit={false} dodged={false} side="left" trigger={popPlayer.key} />
+            <HitFx trigger={shakeP} crit={popPlayerMeta.crit} />
+            <DamagePop amount={popPlayer.amount} crit={popPlayerMeta.crit} dodged={popPlayerMeta.dodged} side="left" trigger={popPlayer.key} />
           </div>
           <HpBar value={state.player.hp} max={state.player.maxHp} color="bg-emerald-500" label="自分" />
           <KiGauge value={state.player.ki} max={state.player.maxKi} />
@@ -97,7 +120,8 @@ export function BattleArena({
         <div className="space-y-2 relative">
           <div key={`ew-${shakeE}`} className={`relative ${shakeE ? "shake-hit" : ""}`}>
             <EnemyPortrait enemy={enemy} />
-            <DamagePop amount={popEnemy.amount} crit={false} dodged={false} side="right" trigger={popEnemy.key} />
+            <HitFx trigger={shakeE} crit={popEnemyMeta.crit} />
+            <DamagePop amount={popEnemy.amount} crit={popEnemyMeta.crit} dodged={popEnemyMeta.dodged} side="right" trigger={popEnemy.key} />
           </div>
           <HpBar value={state.enemy.hp} max={state.enemy.maxHp} color="bg-rose-500" label={enemy.name} />
           <KiGauge value={state.enemy.ki} max={state.enemy.maxKi} />
@@ -106,15 +130,16 @@ export function BattleArena({
       </div>
       <style jsx global>{`
         @keyframes shakeHit {
-          0%   { transform: translate(0,0) rotate(0); }
-          15%  { transform: translate(-6px, 2px) rotate(-1.5deg); }
-          30%  { transform: translate(6px, -2px) rotate(1.5deg); }
-          45%  { transform: translate(-4px, 3px) rotate(-1deg); }
-          60%  { transform: translate(4px, -1px) rotate(1deg); }
-          75%  { transform: translate(-2px, 1px) rotate(-0.5deg); }
+          0%   { transform: translate(0,0) rotate(0) scale(1); filter: brightness(1); }
+          8%   { transform: translate(-10px, 4px) rotate(-2.5deg) scale(1.04); filter: brightness(1.6) contrast(1.2); }
+          18%  { transform: translate(11px, -4px) rotate(2.5deg) scale(0.98); filter: brightness(1.3); }
+          28%  { transform: translate(-8px, 5px) rotate(-1.5deg) scale(1.02); filter: brightness(1.1); }
+          40%  { transform: translate(7px, -2px) rotate(1.5deg) scale(1); filter: brightness(1); }
+          55%  { transform: translate(-4px, 2px) rotate(-0.8deg); }
+          70%  { transform: translate(3px, -1px) rotate(0.6deg); }
           100% { transform: translate(0,0) rotate(0); }
         }
-        .shake-hit { animation: shakeHit 420ms ease-out; }
+        .shake-hit { animation: shakeHit 520ms cubic-bezier(.36,.07,.19,.97); transform-origin: center; }
       `}</style>
 
       {lastLog && (() => {
@@ -273,6 +298,80 @@ function KiGauge({ value, max }: { value: number; max: number }) {
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function HitFx({ trigger, crit }: { trigger: number; crit: boolean }) {
+  if (!trigger) return null;
+  return (
+    <div key={trigger} className="absolute inset-0 pointer-events-none z-10 grid place-items-center overflow-hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/chara/ヒット効果.png" alt=""
+           className="hit-fx-img"
+           style={{
+             width: crit ? "140%" : "115%",
+             maxWidth: "none",
+             filter: crit
+               ? "drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 28px #f43f5e) hue-rotate(-10deg) saturate(1.3)"
+               : "drop-shadow(0 0 10px #f43f5e)",
+             mixBlendMode: "screen",
+           }} />
+      <style jsx>{`
+        .hit-fx-img {
+          animation: hitFxAnim 520ms cubic-bezier(.2,.9,.2,1) forwards;
+          transform-origin: center;
+        }
+        @keyframes hitFxAnim {
+          0%   { opacity: 0; transform: scale(0.3) rotate(-18deg); }
+          20%  { opacity: 1; transform: scale(1.15) rotate(6deg); }
+          55%  { opacity: 1; transform: scale(1) rotate(-3deg); }
+          100% { opacity: 0; transform: scale(1.25) rotate(0deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function ImpactFlash({ data }: { data: { key: number; side: "left" | "right"; crit: boolean; color: string } | null }) {
+  if (!data) return null;
+  const { key, side, crit, color } = data;
+  return (
+    <div key={key} className="fixed inset-0 pointer-events-none z-40 overflow-hidden impact-root">
+      <div className="absolute inset-0 impact-flash"
+           style={{ background: `radial-gradient(circle at ${side === "left" ? "30%" : "70%"} 45%, ${color}55, transparent 55%)` }} />
+      <div className="absolute inset-0 impact-vignette" />
+      {[...Array(crit ? 14 : 8)].map((_, i) => {
+        const rot = (i / (crit ? 14 : 8)) * 360;
+        return (
+          <div key={i} className="absolute top-1/2 left-1/2 impact-line"
+               style={{
+                 width: crit ? "130vw" : "90vw",
+                 height: crit ? "3px" : "2px",
+                 background: `linear-gradient(90deg, transparent 0%, ${color} 45%, #fff 50%, ${color} 55%, transparent 100%)`,
+                 transform: `translate(-50%, -50%) rotate(${rot}deg)`,
+                 animationDelay: `${i * 12}ms`,
+                 opacity: 0.85,
+                 filter: `drop-shadow(0 0 6px ${color})`,
+               }} />
+        );
+      })}
+      <style jsx>{`
+        .impact-root { animation: impactRoot 360ms ease-out forwards; }
+        .impact-flash { animation: impactFade 320ms ease-out forwards; }
+        .impact-vignette {
+          background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.55) 100%);
+          animation: impactFade 400ms ease-out forwards;
+        }
+        .impact-line { animation: impactSweep 380ms cubic-bezier(.2,.8,.2,1) forwards; transform-origin: center; }
+        @keyframes impactRoot { 0% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes impactFade { 0% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes impactSweep {
+          0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r,0)) scaleX(0); }
+          30%  { opacity: 1; transform: translate(-50%, -50%) rotate(var(--r,0)) scaleX(1); }
+          100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r,0)) scaleX(1.1); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -117,7 +117,7 @@ export default function HomePage() {
 
       <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <NavCard href="/train" title="シバキ上げ" desc="スクワ/腕立/プランク" Icon={NAV_ICONS.train} />
-        <NavCard href="/study" title="読み込み" desc="頭を研ぐ" Icon={NAV_ICONS.study} />
+        <NavCard href="/study" title="勉学" desc="頭を研ぐ" Icon={NAV_ICONS.study} />
         <NavCard href="/battle" title="喧嘩" desc="殴り合い" Icon={NAV_ICONS.battle} />
         <NavCard href="/skills" title="技の覚書" desc="スキル習得" Icon={NAV_ICONS.skills} />
         <NavCard href="/equipment" title="装具" desc="手に入れた装備" Icon={NAV_ICONS.equipment} />

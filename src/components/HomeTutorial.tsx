@@ -58,7 +58,7 @@ export function HomeTutorial() {
       title: "鍛錬で強くなれ",
       body: (
         <>
-          <p><b className="text-rose-300">シバキ上げ</b>（スクワ・腕立・プランク）と<b className="text-sky-300">読み込み</b>（勉強）で成長する。</p>
+          <p><b className="text-rose-300">シバキ上げ</b>（スクワ・腕立・プランク）と<b className="text-sky-300">勉学</b>（勉強）で成長する。</p>
           <p>毎日続ければ連続日数ボーナス。続けた分だけ、喧嘩で勝てるようになる。</p>
         </>
       ),
