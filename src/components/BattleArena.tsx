@@ -309,12 +309,13 @@ function HitFx({ trigger, crit }: { trigger: number; crit: boolean }) {
       <img src="/chara/hit-fx.png" alt=""
            className="hit-fx-img"
            style={{
-             width: crit ? "85%" : "65%",
+             width: crit ? "110%" : "90%",
              maxWidth: "none",
-             marginTop: "-18%",
+             marginTop: "-10%",
+             mixBlendMode: "multiply",
              filter: crit
-               ? "drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 28px #f43f5e) saturate(1.4)"
-               : "drop-shadow(0 0 10px #f43f5e)",
+               ? "contrast(1.35) saturate(1.5) drop-shadow(0 0 10px #fbbf24)"
+               : "contrast(1.25) saturate(1.3)",
            }} />
       <style jsx>{`
         .hit-fx-img {
