@@ -130,13 +130,12 @@ export function BattleArena({
       </div>
       <style jsx global>{`
         @keyframes shakeHit {
-          0%   { transform: translate(0,0) rotate(0) scale(1); filter: brightness(1); }
-          8%   { transform: translate(-10px, 4px) rotate(-2.5deg) scale(1.04); filter: brightness(1.6) contrast(1.2); }
-          18%  { transform: translate(11px, -4px) rotate(2.5deg) scale(0.98); filter: brightness(1.3); }
-          28%  { transform: translate(-8px, 5px) rotate(-1.5deg) scale(1.02); filter: brightness(1.1); }
-          40%  { transform: translate(7px, -2px) rotate(1.5deg) scale(1); filter: brightness(1); }
-          55%  { transform: translate(-4px, 2px) rotate(-0.8deg); }
-          70%  { transform: translate(3px, -1px) rotate(0.6deg); }
+          0%   { transform: translate(0,0) rotate(0); }
+          10%  { transform: translate(-9px, 3px) rotate(-2deg); }
+          22%  { transform: translate(10px, -3px) rotate(2deg); }
+          36%  { transform: translate(-7px, 4px) rotate(-1.2deg); }
+          52%  { transform: translate(6px, -2px) rotate(1.2deg); }
+          70%  { transform: translate(-3px, 1px) rotate(-0.6deg); }
           100% { transform: translate(0,0) rotate(0); }
         }
         .shake-hit { animation: shakeHit 520ms cubic-bezier(.36,.07,.19,.97); transform-origin: center; }
@@ -308,14 +307,14 @@ function HitFx({ trigger, crit }: { trigger: number; crit: boolean }) {
     <div key={trigger} className="absolute inset-0 pointer-events-none z-30 grid place-items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/chara/hit-fx.png" alt=""
-           onError={(e) => { (e.currentTarget as HTMLImageElement).style.outline = "3px dashed magenta"; }}
            className="hit-fx-img"
            style={{
-             width: crit ? "150%" : "120%",
+             width: crit ? "85%" : "65%",
              maxWidth: "none",
+             marginTop: "-18%",
              filter: crit
-               ? "drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 28px #f43f5e) saturate(1.4) brightness(1.15)"
-               : "drop-shadow(0 0 10px #f43f5e) brightness(1.1)",
+               ? "drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 28px #f43f5e) saturate(1.4)"
+               : "drop-shadow(0 0 10px #f43f5e)",
            }} />
       <style jsx>{`
         .hit-fx-img {
