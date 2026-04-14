@@ -305,9 +305,10 @@ function KiGauge({ value, max }: { value: number; max: number }) {
 function HitFx({ trigger, crit }: { trigger: number; crit: boolean }) {
   if (!trigger) return null;
   return (
-    <div key={trigger} className="absolute inset-0 pointer-events-none z-10 grid place-items-center overflow-hidden">
+    <div key={trigger} className="absolute inset-0 pointer-events-none z-30 grid place-items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/chara/hit-fx.png" alt=""
+           onError={(e) => { (e.currentTarget as HTMLImageElement).style.outline = "3px dashed magenta"; }}
            className="hit-fx-img"
            style={{
              width: crit ? "150%" : "120%",
