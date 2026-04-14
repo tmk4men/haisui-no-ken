@@ -307,15 +307,14 @@ function HitFx({ trigger, crit }: { trigger: number; crit: boolean }) {
   return (
     <div key={trigger} className="absolute inset-0 pointer-events-none z-10 grid place-items-center overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/chara/ヒット効果.png" alt=""
+      <img src="/chara/hit-fx.png" alt=""
            className="hit-fx-img"
            style={{
-             width: crit ? "140%" : "115%",
+             width: crit ? "150%" : "120%",
              maxWidth: "none",
              filter: crit
-               ? "drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 28px #f43f5e) hue-rotate(-10deg) saturate(1.3)"
-               : "drop-shadow(0 0 10px #f43f5e)",
-             mixBlendMode: "screen",
+               ? "drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 28px #f43f5e) saturate(1.4) brightness(1.15)"
+               : "drop-shadow(0 0 10px #f43f5e) brightness(1.1)",
            }} />
       <style jsx>{`
         .hit-fx-img {

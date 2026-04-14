@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 const NAV = [
   { href: "/train", label: "シバキ", Icon: NAV_ICONS.train },
-  { href: "/study", label: "読込", Icon: NAV_ICONS.study },
+  { href: "/study", label: "勉学", Icon: NAV_ICONS.study },
   { href: "/battle", label: "喧嘩", Icon: NAV_ICONS.battle },
   { href: "/character", label: "漢", Icon: NAV_ICONS.character },
   { href: "/skills", label: "技", Icon: NAV_ICONS.skills },

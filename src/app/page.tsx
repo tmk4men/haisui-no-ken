@@ -102,7 +102,7 @@ export default function HomePage() {
             <Tile label="スクワ" value={todayStats.squatReps} color="text-rose-300" />
             <Tile label="腕立て" value={todayStats.pushupReps} color="text-rose-300" />
             <Tile label="プランク" value={`${Math.floor(todayStats.plankSec)}秒`} color="text-amber-300" />
-            <Tile label="読込分" value={todayStats.studyMin} color="text-sky-300" />
+            <Tile label="勉学分" value={todayStats.studyMin} color="text-sky-300" />
           </div>
         </div>
 

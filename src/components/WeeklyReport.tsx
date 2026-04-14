@@ -25,7 +25,7 @@ export function WeeklyReportModal() {
           <Cell label="スクワ" value={`${r.squats}回`} />
           <Cell label="腕立て" value={`${r.pushups}回`} />
           <Cell label="プランク" value={`${r.plankSec}秒`} />
-          <Cell label="読込" value={`${r.studyMin}分`} />
+          <Cell label="勉学" value={`${r.studyMin}分`} />
           <Cell label="戦績" value={`${r.wins}勝${r.losses}敗`} />
           <Cell label="拳+" value={r.bodyGained.toFixed(1)} />
           <Cell label="頭+" value={r.mindGained.toFixed(1)} />
